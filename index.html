@@ -366,6 +366,12 @@
         let lastSpacePress = 0; // ダブルタップ検出用
         let spacePressTiming = 0;
 
+        // 混沌（カオス）モード用ステート
+        let chaosState = 'normal'; // 'normal' | 'speedup' | 'slowdown' | 'lowgravity'
+        let chaosEventTimer = 0;   // 次のイベントまでのフレーム数
+        let chaosDurationTimer = 0;// 現在のイベントの残り持続フレーム数
+        let screenShake = 0;       // 画面の揺れ幅
+
         // モード別の難易度設定
         const difficultyConfig = {
             classic: {
@@ -1062,7 +1068,7 @@
 
             // 超加速中の速度倍率適用（毎フレームの上書きを防ぐ）
             if (isSuperSpeeding) {
-                activeSpeed = baseSpeed * 2;
+                activeSpeed = baseSpeed * 3;
             }
 
             // C. プレイヤーのアップデート
