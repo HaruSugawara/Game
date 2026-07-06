@@ -108,130 +108,84 @@
             <!-- ==========================================
                  0. タイトル画面
                  ========================================== -->
-            <div id="title-screen" class="absolute inset-0 bg-slate-950 flex flex-col z-20 overflow-hidden">
-
-                <!-- 背景：動くグリッドライン -->
-                <div class="absolute inset-0 pointer-events-none overflow-hidden">
-                    <div style="
-                        background-image: linear-gradient(rgba(99,102,241,0.06) 1px, transparent 1px),
-                                          linear-gradient(90deg, rgba(99,102,241,0.06) 1px, transparent 1px);
-                        background-size: 48px 48px;
-                        width: 100%; height: 100%;
-                    "></div>
-                    <!-- コーナーの光彩 -->
-                    <div style="position:absolute;top:-80px;left:-80px;width:320px;height:320px;background:radial-gradient(circle,rgba(99,102,241,0.18) 0%,transparent 70%);"></div>
-                    <div style="position:absolute;bottom:-80px;right:-80px;width:320px;height:320px;background:radial-gradient(circle,rgba(6,182,212,0.15) 0%,transparent 70%);"></div>
+            <div id="title-screen" class="absolute inset-0 bg-slate-950 flex flex-col z-20 overflow-y-auto py-12 px-4 items-center">
+                <!-- 背景：薄い光彩 -->
+                <div class="fixed inset-0 pointer-events-none overflow-hidden">
+                    <div style="position:absolute;top:-100px;left:-100px;width:400px;height:400px;background:radial-gradient(circle,rgba(99,102,241,0.05) 0%,transparent 70%);"></div>
+                    <div style="position:absolute;bottom:-100px;right:-100px;width:400px;height:400px;background:radial-gradient(circle,rgba(6,182,212,0.05) 0%,transparent 70%);"></div>
                 </div>
 
-                <!-- ── 上：ゲームタイトル ── -->
-                <div class="relative flex-shrink-0 pt-7 md:pt-9 px-6 text-center">
-                    <span class="px-3 py-1 bg-indigo-500/10 text-indigo-400 border border-indigo-500/30 rounded-full text-[10px] font-bold tracking-[0.25em] uppercase font-hud mb-4 inline-block">
-                        CYBER RUNNER PROJECT
-                    </span>
-
-                    <!-- メインタイトル（ネオングロー） -->
-                    <h2 class="text-5xl md:text-6xl font-black tracking-[0.1em] font-hud"
-                        style="
-                            background: linear-gradient(90deg, #818cf8 0%, #22d3ee 50%, #818cf8 100%);
-                            -webkit-background-clip: text;
-                            -webkit-text-fill-color: transparent;
-                            background-clip: text;
-                            filter: drop-shadow(0 0 16px rgba(99,102,241,0.7));
-                        ">
-                        GRAVITY_SHIFT
+                <div class="relative z-10 w-full flex flex-col items-center">
+                    <!-- BROWSER GAME ラベル -->
+                    <div class="text-cyan-400 text-[10px] font-bold tracking-[0.2em] uppercase mb-6 px-4 py-1 rounded-full border border-cyan-500/30 bg-cyan-500/10">
+                        BROWSER GAME
+                    </div>
+                    
+                    <!-- メインタイトル -->
+                    <h2 class="text-4xl md:text-5xl font-black text-transparent bg-clip-text bg-gradient-to-r from-pink-500 to-purple-500 tracking-[0.1em] font-hud mb-3 text-center neon-text-magenta">
+                        GRAVITY SHIFT
                     </h2>
-                    <p class="text-slate-500 text-xs mt-2 font-hud tracking-[0.2em]">
-                        重力反転 × スキル駆け抜けアクション
-                    </p>
+                    <p class="text-slate-400 text-sm mb-12 text-center">重力反転 ── スキルを駆使して、走り抜けろ。</p>
 
-                    <!-- タイトル下の区切りライン -->
-                    <div class="mx-auto mt-4 w-24 h-px"
-                         style="background:linear-gradient(90deg,transparent,rgba(99,102,241,0.7),transparent);"></div>
-                </div>
-
-                <!-- ── 中：コンセプト ── -->
-                <div class="relative flex-1 flex items-center justify-center px-6 md:px-16">
-                    <div class="max-w-xl text-center">
-                        <span class="text-cyan-400 text-[10px] font-bold tracking-[0.3em] font-hud block mb-3">
-                            ─── CONCEPT ───
-                        </span>
-                        <p class="text-slate-100 text-sm md:text-base leading-loose">
-                            上下2レーンを <strong class="text-white">重力反転</strong> で行き来し、<br>
-                            迫り来る障害物を避け走り続ける
-                            <strong class="text-indigo-400">サイバーパンク風ランナー</strong>。
-                        </p>
-                        <p class="text-slate-400 text-xs md:text-sm mt-3 leading-loose">
-                            障害物を避けるほどスキルゲージが溜まり、<br>
-                            タイミングを見計らって <strong class="text-amber-400">無敵スキル</strong> を発動。<br>
-                            <span class="text-slate-500">一気に駆け抜けろ。</span>
-                        </p>
-
-                        <!-- コンセプトを囲む薄い枠 -->
-                        <div class="mt-5 mx-auto max-w-xs h-px"
-                             style="background:linear-gradient(90deg,transparent,rgba(6,182,212,0.5),transparent);"></div>
-                    </div>
-                </div>
-
-                <!-- ── 下：工夫ポイント ── -->
-                <div class="relative flex-shrink-0 px-5 pb-6 md:pb-8">
-                    <span class="text-amber-400 text-[10px] font-bold tracking-[0.3em] font-hud block text-center mb-3">
-                        ─── FEATURES ───
-                    </span>
-
-                    <!-- 3つの特徴カード -->
-                    <div class="grid grid-cols-3 gap-2 md:gap-3 max-w-2xl mx-auto mb-5">
-
-                        <!-- 特徴1 -->
-                        <div class="relative bg-slate-900 border border-indigo-500/30 rounded-xl p-3 text-center overflow-hidden"
-                             style="box-shadow:0 0 12px rgba(99,102,241,0.15);">
-                            <div class="absolute inset-0 opacity-5"
-                                 style="background:linear-gradient(135deg,#6366f1,transparent);"></div>
-                            <i data-lucide="repeat" class="w-5 h-5 text-indigo-400 mx-auto mb-1.5"></i>
-                            <p class="text-[11px] font-black text-white font-hud tracking-wide">重力反転操作</p>
-                            <p class="text-[9px] text-slate-400 mt-1 leading-snug">
-                                SPACE / タップで<br>上下を瞬時に切替。<br>フェイントが鍵。
+                    <!-- コンテンツコンテナ -->
+                    <div class="w-full max-w-3xl space-y-6">
+                        
+                        <!-- ゲームタイトル カード -->
+                        <div class="bg-slate-900/60 border border-cyan-800/80 rounded-lg p-6 lg:p-8 backdrop-blur-sm">
+                            <h3 class="text-cyan-400 font-bold mb-4 border-b border-cyan-800/50 pb-2 text-sm tracking-wide">ゲームタイトル</h3>
+                            <p class="text-white font-bold mb-3 text-lg">GRAVITY SHIFT (グラビティ・シフト)</p>
+                            <p class="text-slate-300 text-sm leading-relaxed">
+                                ブラウザだけで遊べる、サイバーパンク風の重力反転ランナーゲームです。スペースキーや画面タップで上下のレーンを瞬時に移動し、迫り来る様々な障害物を避けながら、どこまで走り続けられるかに挑戦します。
                             </p>
                         </div>
 
-                        <!-- 特徴2 -->
-                        <div class="relative bg-slate-900 border border-amber-500/30 rounded-xl p-3 text-center overflow-hidden"
-                             style="box-shadow:0 0 12px rgba(251,191,36,0.12);">
-                            <div class="absolute inset-0 opacity-5"
-                                 style="background:linear-gradient(135deg,#f59e0b,transparent);"></div>
-                            <i data-lucide="zap" class="w-5 h-5 text-amber-400 mx-auto mb-1.5"></i>
-                            <p class="text-[11px] font-black text-white font-hud tracking-wide">2段階スキル</p>
-                            <p class="text-[9px] text-slate-400 mt-1 leading-snug">
-                                Lv.1 シールド<br>Lv.2 虚空加速。<br>ゲージ管理が勝負。
+                        <!-- コンセプト カード -->
+                        <div class="bg-slate-900/60 border border-cyan-800/80 rounded-lg p-6 lg:p-8 backdrop-blur-sm">
+                            <h3 class="text-cyan-400 font-bold mb-4 border-b border-cyan-800/50 pb-2 text-sm tracking-wide">コンセプト</h3>
+                            <p class="text-slate-300 text-sm leading-relaxed mb-4">
+                                単純なジャンプアクションではなく、<strong class="text-white">重力を反転させて上下の天井と床を行き来する</strong>操作感が特徴です。
+                            </p>
+                            <p class="text-slate-300 text-sm leading-relaxed">
+                                障害物をギリギリで避けることでスキルゲージが蓄積され、任意のタイミングで<strong class="text-indigo-300">無敵シールド（Lv.1）</strong>や<strong class="text-pink-300">超加速状態（Lv.2）</strong>を発動できます。ゲージ管理の戦略性と、ピンチをスキルで切り抜ける爽快感がこのゲームの醍醐味です。
                             </p>
                         </div>
 
-                        <!-- 特徴3 -->
-                        <div class="relative bg-slate-900 border border-pink-500/30 rounded-xl p-3 text-center overflow-hidden"
-                             style="box-shadow:0 0 12px rgba(236,72,153,0.12);">
-                            <div class="absolute inset-0 opacity-5"
-                                 style="background:linear-gradient(135deg,#ec4899,transparent);"></div>
-                            <i data-lucide="flame" class="w-5 h-5 text-pink-400 mx-auto mb-1.5"></i>
-                            <p class="text-[11px] font-black text-white font-hud tracking-wide">3つのモード</p>
-                            <p class="text-[9px] text-slate-400 mt-1 leading-snug">
-                                王道・二択・混沌。<br>難易度とギミックが<br>それぞれ変化。
-                            </p>
+                        <!-- 工夫ポイント カード -->
+                        <div class="bg-slate-900/60 border border-cyan-800/80 rounded-lg p-6 lg:p-8 backdrop-blur-sm">
+                            <h3 class="text-cyan-400 font-bold mb-4 border-b border-cyan-800/50 pb-2 text-sm tracking-wide">工夫ポイント</h3>
+                            <ul class="list-disc list-inside text-slate-300 text-sm space-y-4">
+                                <li>
+                                    <strong>多彩なゲームモード</strong> ── 通常の「王道」、2択を迫られる「二択」、突発的なイベントが発生する「混沌」の3つのモードを用意し、リプレイ性を高めました。
+                                </li>
+                                <li>
+                                    <strong>カオス（混沌）モードの演出</strong> ── 「急加速」「時間拡張（低速化）」「無重力」といったランダムイベントと画面揺れ（スクリーンシェイク）を実装し、スリリングな体験を作り出しています。
+                                </li>
+                                <li>
+                                    <strong>スキルの視覚的フィードバック</strong> ── 第2段階スキル（超加速）発動時には、プレイヤーの残像や画面端のヴィネット効果、流れる光のラインを描画し、「虚空」を疾走するスピード感を視覚的に表現しました。
+                                </li>
+                                <li>
+                                    <strong>事故防止の配慮</strong> ── ワープホール（ポータル）の出入り口付近には障害物を配置しないようにし、ワープ直後には短時間の無敵時間を付与する「理不尽な死」を防ぐ処理を入れています。
+                                </li>
+                            </ul>
                         </div>
+
                     </div>
 
-                    <!-- スタートボタン -->
-                    <div class="flex justify-center">
+                    <!-- プレイボタン -->
+                    <div class="mt-12 mb-8">
                         <button onclick="showModeSelect()"
-                                class="group relative px-14 py-3.5 font-bold text-sm tracking-[0.2em] rounded-xl font-hud overflow-hidden transition-all duration-200 hover:scale-105"
-                                style="background:linear-gradient(90deg,#4f46e5,#06b6d4);box-shadow:0 0 24px rgba(99,102,241,0.4);">
-                            <span class="relative z-10 text-white">LAUNCH RUNNER →</span>
-                            <!-- hover時の内側グロー -->
-                            <div class="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-200"
-                                 style="background:linear-gradient(90deg,rgba(255,255,255,0.1),rgba(255,255,255,0.05));"></div>
+                                class="px-10 py-3.5 bg-cyan-600 hover:bg-cyan-500 text-white font-bold rounded-full transition-all duration-200 border border-cyan-400 shadow-[0_0_15px_rgba(6,182,212,0.4)] hover:shadow-[0_0_25px_rgba(6,182,212,0.6)] hover:scale-105">
+                            ゲームをプレイする
                         </button>
                     </div>
-                    <p class="text-slate-700 text-[10px] text-center mt-2.5 font-hud tracking-wider">
-                        SPACE / ENTER でモード選択へ
-                    </p>
+
+                    <!-- GitHub URL -->
+                    <div class="w-full max-w-3xl bg-slate-900/40 border border-cyan-800/60 rounded-lg p-5 text-center mt-4 mb-12">
+                        <p class="text-cyan-400 text-xs font-bold mb-2">GitHub Pages URL :</p>
+                        <a href="https://harusugawara.github.io/Game/" target="_blank" class="text-slate-300 hover:text-white text-sm hover:underline transition-colors break-all">
+                            https://harusugawara.github.io/Game/
+                        </a>
+                    </div>
                 </div>
             </div>
 
