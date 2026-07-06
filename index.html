@@ -8,6 +8,9 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Lucide Icons (ゲーム画面のアイコン表示用) -->
     <script src="https://unpkg.com/lucide@latest"></script>
+    <!-- Firebase SDK (Compat version) -->
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght=400;700;900&family=Rajdhani:wght=500;700&display=swap');
         .font-gaming {
@@ -236,35 +239,55 @@
             <!-- ==========================================
                  2. リザルト画面
                  ========================================== -->
-            <div id="result-screen" class="hidden absolute inset-0 bg-slate-950/95 flex flex-col items-center justify-center p-6 z-20">
-                <div class="text-center mb-6">
-                    <span class="px-3 py-1 bg-red-500/10 text-red-400 border border-red-500/30 rounded-full text-xs font-bold tracking-widest uppercase font-hud mb-2 inline-block">CONNECTION LOST</span>
-                    <h2 class="text-4xl font-black text-white font-hud">RUN_TERMINATED</h2>
-                    <p class="text-slate-400 text-sm">システムが物理衝突を検知、シミュレーションを強制終了しました。</p>
+            <div id="result-screen" class="hidden absolute inset-0 bg-slate-950/98 flex flex-col items-center justify-center p-4 md:p-6 z-20 overflow-y-auto">
+                <div class="text-center mb-4">
+                    <span class="px-3 py-1 bg-red-500/10 text-red-400 border border-red-500/30 rounded-full text-[10px] font-bold tracking-widest uppercase font-hud mb-1.5 inline-block">CONNECTION LOST</span>
+                    <h2 class="text-3xl font-black text-white font-hud">RUN_TERMINATED</h2>
+                    <p class="text-slate-400 text-xs">物理的衝突を検知。シミュレーションを終了します。</p>
                 </div>
 
-                <!-- スコアボード -->
-                <div class="grid grid-cols-2 gap-4 w-full max-w-md mb-8">
-                    <div class="bg-slate-900 border border-slate-800 rounded-xl p-4 text-center">
-                        <span class="text-slate-500 text-xs font-bold block font-hud">FINAL SCORE</span>
-                        <span id="res-score" class="text-4xl font-black font-hud text-indigo-400">0</span>
+                <!-- スコアボード & ランキング統合コンテナ -->
+                <div class="w-full max-w-md bg-slate-900/90 border border-slate-850 rounded-2xl p-4 mb-4 backdrop-blur-md shadow-2xl">
+                    <!-- 今回の記録 -->
+                    <div class="grid grid-cols-3 gap-2 text-center border-b border-slate-800 pb-3 mb-3">
+                        <div>
+                            <span class="text-slate-500 text-[9px] font-bold block font-hud">SCORE</span>
+                            <span id="res-score" class="text-2xl font-black font-hud text-indigo-400">0</span>
+                        </div>
+                        <div>
+                            <span class="text-slate-500 text-[9px] font-bold block font-hud">MULTIPLIER</span>
+                            <span id="res-multiplier" class="text-2xl font-black font-hud text-cyan-400">x1.0</span>
+                        </div>
+                        <div>
+                            <span class="text-slate-500 text-[9px] font-bold block font-hud">TIME</span>
+                            <span id="res-time" class="text-xl font-bold font-hud text-white">0.0s</span>
+                        </div>
                     </div>
-                    <div class="bg-slate-900 border border-slate-800 rounded-xl p-4 text-center">
-                        <span class="text-slate-500 text-xs font-bold block font-hud">MAX MULTIPLIER</span>
-                        <span id="res-multiplier" class="text-4xl font-black font-hud text-cyan-400">x1.0</span>
+                    
+                    <!-- ランキングリスト -->
+                    <div>
+                        <h3 class="text-cyan-400 text-[10px] font-bold font-hud tracking-[0.2em] mb-2.5 text-center uppercase">🏆 CURRENT TOP 5 LEADERBOARD</h3>
+                        <div id="leaderboard-list" class="space-y-1.5 text-xs font-hud">
+                            <!-- JSによって1位〜5位が挿入されます -->
+                        </div>
                     </div>
-                    <div class="col-span-2 bg-slate-900 border border-slate-800 rounded-xl p-4 text-center">
-                        <span class="text-slate-500 text-xs font-bold block font-hud">SURVIVED TIME</span>
-                        <span id="res-time" class="text-xl font-bold font-hud text-white">0.0s</span>
+                </div>
+
+                <!-- 名前入力フォーム (ランクイン時のみ表示) -->
+                <div id="rank-in-container" class="hidden w-full max-w-md bg-indigo-950/30 border border-indigo-500/30 rounded-2xl p-3 mb-4 text-center backdrop-blur-sm">
+                    <p class="text-indigo-400 text-[10px] font-bold mb-2 tracking-widest animate-pulse font-hud">🎉 NEW RECORD! ENTER YOUR NAME</p>
+                    <div class="flex gap-2">
+                        <input type="text" id="player-name-input" maxlength="10" placeholder="NAME" class="flex-1 bg-slate-950/80 border border-indigo-500/50 rounded-xl px-3 py-1.5 text-white text-center font-bold tracking-widest focus:outline-none focus:border-indigo-400 font-hud">
+                        <button onclick="submitScore()" class="px-5 py-1.5 bg-indigo-600 hover:bg-indigo-500 text-white font-bold rounded-xl transition text-xs font-hud border border-indigo-400/40">SAVE</button>
                     </div>
                 </div>
 
                 <!-- 操作ボタン -->
-                <div class="flex gap-4 w-full max-w-md">
-                    <button onclick="showMenu()" class="flex-1 py-3.5 bg-slate-800 hover:bg-slate-700 text-white font-bold rounded-xl transition flex items-center justify-center gap-2 font-hud text-sm">
+                <div class="flex gap-3 w-full max-w-md">
+                    <button onclick="showMenu()" class="flex-1 py-3 bg-slate-800/80 hover:bg-slate-700 text-white font-bold rounded-xl transition flex items-center justify-center gap-2 font-hud text-xs border border-slate-700/50">
                         <i data-lucide="home" class="w-4 h-4"></i> MENU
                     </button>
-                    <button onclick="startGame()" class="flex-1 py-3.5 bg-gradient-to-r from-indigo-600 to-cyan-500 text-white font-bold rounded-xl transition shadow-lg shadow-indigo-500/20 flex items-center justify-center gap-2 font-hud text-sm">
+                    <button onclick="startGame()" class="flex-1 py-3 bg-gradient-to-r from-indigo-600 to-cyan-500 text-white font-bold rounded-xl transition shadow-lg shadow-indigo-500/10 flex items-center justify-center gap-2 font-hud text-xs">
                         <i data-lucide="rotate-ccw" class="w-4 h-4"></i> REBOOT
                     </button>
                 </div>
@@ -289,6 +312,159 @@
     <script>
         // Lucideアイコンを展開
         lucide.createIcons();
+
+        // ------------------------------------------
+        // Firebase初期化 & データベース管理
+        // ------------------------------------------
+        const firebaseConfig = {
+            apiKey: "YOUR_API_KEY",
+            authDomain: "YOUR_AUTH_DOMAIN",
+            projectId: "YOUR_PROJECT_ID",
+            storageBucket: "YOUR_STORAGE_BUCKET",
+            messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
+            appId: "YOUR_APP_ID"
+        };
+
+        // 接続判断フラグ (APIキーが変更されたらFirebaseを有効化、それまではlocalStorageに自動保存)
+        const useOnlineDB = firebaseConfig.apiKey !== "YOUR_API_KEY";
+        let db = null;
+
+        if (useOnlineDB) {
+            try {
+                firebase.initializeApp(firebaseConfig);
+                db = firebase.firestore();
+                console.log("Firebase initialized successfully.");
+            } catch (e) {
+                console.error("Firebase initialization failed:", e);
+            }
+        } else {
+            console.log("Using LocalStorage for leaderboard (FirebaseConfig is default).");
+        }
+
+        // ランキングの読み込み
+        async function fetchLeaderboard(mode) {
+            if (useOnlineDB && db) {
+                try {
+                    const snapshot = await db.collection("scores")
+                        .where("mode", "==", mode)
+                        .orderBy("score", "desc")
+                        .limit(5)
+                        .get();
+                    const list = [];
+                    snapshot.forEach(doc => list.push(doc.data()));
+                    return list;
+                } catch (e) {
+                    console.error("Error fetching online scores:", e);
+                }
+            }
+            // ローカルストレージフォールバック
+            const localData = localStorage.getItem(`leaderboard_${mode}`);
+            if (localData) {
+                return JSON.parse(localData).slice(0, 5);
+            }
+            return [];
+        }
+
+        // 新規スコアの登録
+        async function saveScoreToDB(name, score, mode) {
+            const dateStr = new Date().toLocaleDateString('ja-JP', { month: '2-digit', day: '2-digit' });
+            const record = { name, score, mode, date: dateStr, timestamp: Date.now() };
+
+            if (useOnlineDB && db) {
+                try {
+                    await db.collection("scores").add(record);
+                    return;
+                } catch (e) {
+                    console.error("Error saving online score:", e);
+                }
+            }
+
+            // ローカルストレージフォールバック
+            const localKey = `leaderboard_${mode}`;
+            let list = [];
+            const localData = localStorage.getItem(localKey);
+            if (localData) {
+                list = JSON.parse(localData);
+            }
+            list.push(record);
+            list.sort((a, b) => b.score - a.score);
+            list = list.slice(0, 5);
+            localStorage.setItem(localKey, JSON.stringify(list));
+        }
+
+        let currentRunScore = 0;
+
+        // ゲームオーバー時の処理
+        async function handleResultAndLeaderboard(score, mode) {
+            currentRunScore = score;
+            document.getElementById('res-score').innerText = score;
+            
+            // ローディング表示
+            const listEl = document.getElementById('leaderboard-list');
+            listEl.innerHTML = '<div class="text-center py-4 text-slate-500 animate-pulse">LOADING LEADERBOARD...</div>';
+
+            // ランキング読み込みと表示
+            const board = await fetchLeaderboard(mode);
+            renderLeaderboard(board);
+
+            // ランクイン判定（5位より高いか、まだ5件未満か）
+            const isRankIn = board.length < 5 || score > board[board.length - 1].score;
+            
+            const inputContainer = document.getElementById('rank-in-container');
+            if (isRankIn && score > 0) {
+                inputContainer.classList.remove('hidden');
+                document.getElementById('player-name-input').value = "";
+                document.getElementById('player-name-input').focus();
+            } else {
+                inputContainer.classList.add('hidden');
+            }
+        }
+
+        function renderLeaderboard(board) {
+            const listEl = document.getElementById('leaderboard-list');
+            listEl.innerHTML = '';
+            
+            // 5つの行を作成
+            for (let i = 0; i < 5; i++) {
+                const item = board[i];
+                const row = document.createElement('div');
+                row.className = 'flex justify-between items-center py-2 border-b border-slate-800/50 last:border-0';
+                
+                let rankColor = 'text-slate-400';
+                if (i === 0) rankColor = 'text-amber-400 font-bold';
+                else if (i === 1) rankColor = 'text-slate-300 font-bold';
+                else if (i === 2) rankColor = 'text-amber-600 font-bold';
+
+                const rankSpan = `<span class="font-bold ${rankColor} w-8">${i + 1}st</span>`;
+                const nameSpan = `<span class="flex-1 text-left truncate text-slate-300 px-2 font-bold">${item ? item.name : '---'}</span>`;
+                const dateSpan = `<span class="text-[10px] text-slate-600 mr-3">${item ? item.date : ''}</span>`;
+                const scoreSpan = `<span class="font-bold text-white text-right w-16">${item ? item.score : '0'}</span>`;
+                
+                row.innerHTML = rankSpan + nameSpan + dateSpan + scoreSpan;
+                listEl.appendChild(row);
+            }
+        }
+
+        async function submitScore() {
+            const inputEl = document.getElementById('player-name-input');
+            const name = inputEl.value.trim().toUpperCase() || 'RUNNER';
+            
+            // 保存ボタンを一時的に無効化
+            const submitBtn = document.querySelector('#rank-in-container button');
+            if (submitBtn) submitBtn.disabled = true;
+
+            // 保存
+            await saveScoreToDB(name, currentRunScore, currentMode);
+            
+            // 入力欄を隠して、ランキングを再描画
+            document.getElementById('rank-in-container').classList.add('hidden');
+            if (submitBtn) submitBtn.disabled = false;
+            
+            const updatedBoard = await fetchLeaderboard(currentMode);
+            renderLeaderboard(updatedBoard);
+            
+            playSound('select');
+        }
 
         /*
          * ==========================================
@@ -1165,9 +1341,11 @@
 
             // 画面の表示切り替え
             document.getElementById('result-screen').classList.remove('hidden');
-            document.getElementById('res-score').innerText = score;
             document.getElementById('res-multiplier').innerText = `x${comboMultiplier.toFixed(1)}`;
             document.getElementById('res-time').innerText = `${gameTime.toFixed(1)}s`;
+
+            // ランキング処理 & 今回のスコア表示
+            handleResultAndLeaderboard(score, currentMode);
         }
 
         // ==========================================
