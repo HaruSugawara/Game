@@ -176,7 +176,7 @@
 
                     <!-- プレイボタン -->
                     <div class="mt-12 mb-8">
-                        <button onclick="showModeSelect()"
+                        <button onclick="showPlayStyleSelect()"
                                 class="px-10 py-3.5 bg-cyan-600 hover:bg-cyan-500 text-white font-bold rounded-full transition-all duration-200 border border-cyan-400 shadow-[0_0_15px_rgba(6,182,212,0.4)] hover:shadow-[0_0_25px_rgba(6,182,212,0.6)] hover:scale-105">
                             ゲームをプレイする
                         </button>
@@ -192,6 +192,124 @@
                 </div>
             </div>
 
+            <!-- ==========================================
+                 0.5 プレイ人数選択画面
+                 ========================================== -->
+            <div id="play-style-screen" class="hidden absolute inset-0 bg-slate-950 flex flex-col items-center justify-center p-6 z-20 overflow-y-auto">
+                <div class="text-center mb-8">
+                    <span class="px-3 py-1 bg-cyan-500/10 text-cyan-400 border border-cyan-500/30 rounded-full text-xs font-bold tracking-widest uppercase font-hud mb-3 inline-block">SELECT PLAYER COUNT</span>
+                    <h2 class="text-2xl md:text-3xl font-black text-white tracking-widest font-hud">PLAY STYLE</h2>
+                    <p class="text-slate-400 text-sm mt-1">プレイ人数を選択してください</p>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 w-full max-w-2xl mb-8">
+                    <!-- 1Pボタン -->
+                    <button onclick="selectPlayStyle(1)" class="group relative bg-slate-900 border border-slate-800 hover:border-indigo-500/80 p-6 rounded-2xl text-left transition-all duration-300 hover:scale-102 flex flex-col justify-between h-48">
+                        <div>
+                            <div class="text-indigo-400 mb-2"><i data-lucide="user" class="w-8 h-8"></i></div>
+                            <h3 class="text-xl font-bold font-hud text-white mb-2">1 PLAYER (ソロ)</h3>
+                            <p class="text-xs text-slate-400 leading-relaxed">これまでのゲーム体験。3つのモードでハイスコアを競い、オンラインランキングに記録を残します。</p>
+                        </div>
+                        <div class="text-[10px] text-indigo-400 font-hud font-bold tracking-wider self-end">SOLO RUN -></div>
+                    </button>
+
+                    <!-- 2Pオンラインボタン -->
+                    <button onclick="selectPlayStyle(2)" class="group relative bg-slate-900 border border-slate-800 hover:border-cyan-500/80 p-6 rounded-2xl text-left transition-all duration-300 hover:scale-102 flex flex-col justify-between h-48">
+                        <div>
+                            <div class="text-cyan-400 mb-2"><i data-lucide="users" class="w-8 h-8"></i></div>
+                            <h3 class="text-xl font-bold font-hud text-white mb-2">ONLINE BATTLE (対戦)</h3>
+                            <p class="text-xs text-slate-400 leading-relaxed">4桁のパスコードを共有し、別の端末にいるライバルと画面分割で生存を競い合うリアルタイム対戦です。</p>
+                        </div>
+                        <div class="text-[10px] text-cyan-400 font-hud font-bold tracking-wider self-end">MULTIPLAYER -></div>
+                    </button>
+                </div>
+                
+                <button onclick="backToTitle()" class="px-6 py-2 bg-slate-800 hover:bg-slate-700 text-white rounded-xl text-xs font-hud transition-colors border border-slate-700/50">
+                    BACK TO TITLE
+                </button>
+            </div>
+
+            <!-- ==========================================
+                 0.6 オンラインロビー画面
+                 ========================================== -->
+            <div id="online-lobby-screen" class="hidden absolute inset-0 bg-slate-950 flex flex-col items-center justify-center p-6 z-20 overflow-y-auto">
+                <div class="text-center mb-8">
+                    <span class="px-3 py-1 bg-cyan-500/10 text-cyan-400 border border-cyan-500/30 rounded-full text-xs font-bold tracking-widest uppercase font-hud mb-3 inline-block">ONLINE LOBBY</span>
+                    <h2 class="text-2xl md:text-3xl font-black text-white tracking-widest font-hud">ONLINE MATCHING</h2>
+                    <p class="text-slate-400 text-sm mt-1">ルームを作成するか、作成されたルームに参加してください</p>
+                </div>
+
+                <!-- メインカード -->
+                <div class="w-full max-w-md bg-slate-900/90 border border-slate-800 rounded-2xl p-6 mb-8 backdrop-blur-md shadow-2xl">
+                    
+                    <!-- アクション選択（入るか作るか） -->
+                    <div id="lobby-actions" class="space-y-4">
+                        <button onclick="createOnlineRoom()" class="w-full py-4 bg-indigo-600 hover:bg-indigo-500 text-white font-bold rounded-xl transition flex items-center justify-center gap-2 font-hud tracking-widest">
+                            <i data-lucide="plus-circle" class="w-5 h-5"></i> CREATE ROOM
+                        </button>
+                        
+                        <div class="flex items-center my-4">
+                            <div class="flex-grow h-px bg-slate-800"></div>
+                            <span class="px-3 text-xs text-slate-500 font-hud">OR</span>
+                            <div class="flex-grow h-px bg-slate-800"></div>
+                        </div>
+
+                        <div class="space-y-2">
+                            <input type="text" id="room-code-input" maxlength="4" placeholder="ENTER 4-DIGIT CODE" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-white text-center font-bold tracking-[0.4em] focus:outline-none focus:border-cyan-500 font-hud">
+                            <button onclick="joinOnlineRoom()" class="w-full py-4 bg-cyan-600 hover:bg-cyan-500 text-white font-bold rounded-xl transition flex items-center justify-center gap-2 font-hud tracking-widest border border-cyan-400/30">
+                                <i data-lucide="arrow-right-circle" class="w-5 h-5"></i> JOIN ROOM
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- 待機ロビー (部屋作成時/入室成功時に表示) -->
+                    <div id="lobby-wait" class="hidden space-y-6">
+                        <div class="text-center p-4 bg-slate-950 rounded-xl border border-slate-850">
+                            <span class="text-slate-500 text-[10px] font-bold block font-hud mb-1">ROOM CODE</span>
+                            <span id="display-room-code" class="text-4xl font-black text-cyan-400 font-hud tracking-[0.2em] neon-text-cyan">----</span>
+                        </div>
+
+                        <!-- プレイヤーリスト -->
+                        <div class="space-y-2">
+                            <div class="flex justify-between items-center px-4 py-2 bg-slate-950/60 rounded-xl border border-slate-850">
+                                <span class="text-slate-300 font-bold text-sm">PLAYER 1 (HOST)</span>
+                                <span id="lobby-p1-status" class="text-xs text-slate-500 font-hud uppercase">WAITING...</span>
+                            </div>
+                            <div class="flex justify-between items-center px-4 py-2 bg-slate-950/60 rounded-xl border border-slate-850">
+                                <span class="text-slate-300 font-bold text-sm">PLAYER 2 (GUEST)</span>
+                                <span id="lobby-p2-status" class="text-xs text-slate-500 font-hud uppercase">WAITING...</span>
+                            </div>
+                        </div>
+
+                        <!-- ホスト限定ルール設定 (Ready時に表示) -->
+                        <div id="host-rule-select" class="hidden space-y-3">
+                            <span class="text-indigo-400 text-xs font-bold block font-hud text-center uppercase">SELECT RULE & START</span>
+                            <div class="grid grid-cols-3 gap-2">
+                                <button onclick="setRoomMode('classic')" id="room-btn-classic" class="py-2 px-1 text-[10px] font-bold rounded-lg border border-indigo-500 bg-indigo-500/20 text-white font-hud">CLASSIC</button>
+                                <button onclick="setRoomMode('double')" id="room-btn-double" class="py-2 px-1 text-[10px] font-bold rounded-lg border border-slate-800 bg-slate-950 text-slate-400 font-hud">DOUBLE</button>
+                                <button onclick="setRoomMode('chaos')" id="room-btn-chaos" class="py-2 px-1 text-[10px] font-bold rounded-lg border border-slate-800 bg-slate-950 text-slate-400 font-hud">CHAOS</button>
+                            </div>
+                            <button onclick="startOnlineGame()" id="start-battle-btn" class="w-full py-3 bg-gradient-to-r from-indigo-600 to-cyan-500 text-white font-bold rounded-xl transition shadow-lg shadow-indigo-500/20 font-hud text-sm tracking-wider uppercase">
+                                START BATTLE
+                            </button>
+                        </div>
+
+                        <!-- ゲスト用待機メッセージ -->
+                        <div id="guest-wait-msg" class="hidden text-center text-xs text-slate-500 font-hud animate-pulse py-2">
+                            WAITING FOR HOST TO START GAME...
+                        </div>
+                    </div>
+                </div>
+
+                <div class="flex gap-4">
+                    <button onclick="leaveLobby()" id="leave-lobby-btn" class="hidden px-6 py-2 bg-red-950/20 hover:bg-red-950/40 text-red-400 rounded-xl text-xs font-hud transition-colors border border-red-900/30">
+                        LEAVE ROOM
+                    </button>
+                    <button onclick="backToPlayStyle()" id="lobby-back-btn" class="px-6 py-2 bg-slate-800 hover:bg-slate-700 text-white rounded-xl text-xs font-hud transition-colors border border-slate-700/50">
+                        BACK
+                    </button>
+                </div>
+            </div>
 
             <!-- ==========================================
                  1. モード選択＆メインメニュー
@@ -339,6 +457,483 @@
             }
         } else {
             console.log("Using LocalStorage for leaderboard (FirebaseConfig is default).");
+        }
+
+        // ------------------------------------------
+        // オンライン対戦用 グローバル変数 & ロジック
+        // ------------------------------------------
+        let playerCount = 1;
+        let isOnlineBattle = false;
+        let onlineRole = 'host'; // 'host' | 'guest'
+        let onlineRoomId = '';
+        let onlineUnsubscribe = null;
+        let onlineUpdateInterval = null;
+        let randomSeed = 0.5;
+
+        // 状態オブジェクト
+        let myPlayerStatus = { y: 200, vy: 0, isUpsideDown: false, score: 0, isDead: false, isShielded: false, isSuperSpeeding: false, trail: [] };
+        let opponentPlayerStatus = { y: 200, vy: 0, isUpsideDown: false, score: 0, isDead: false, isShielded: false, isSuperSpeeding: false, trail: [] };
+
+        // 乱数シード生成 & シード付き乱数
+        function seededRandom() {
+            const x = Math.sin(randomSeed++) * 10000;
+            return x - Math.floor(x);
+        }
+        function getRand() {
+            return isOnlineBattle ? seededRandom() : Math.random();
+        }
+
+        // 画面遷移関数
+        function showPlayStyleSelect() {
+            document.getElementById('title-screen').classList.add('hidden');
+            document.getElementById('play-style-screen').classList.remove('hidden');
+            playSound('select');
+        }
+
+        function backToTitle() {
+            document.getElementById('play-style-screen').classList.add('hidden');
+            document.getElementById('title-screen').classList.remove('hidden');
+            playSound('select');
+        }
+
+        function selectPlayStyle(count) {
+            playerCount = count;
+            document.getElementById('play-style-screen').classList.add('hidden');
+            if (count === 1) {
+                isOnlineBattle = false;
+                document.getElementById('menu-screen').classList.remove('hidden');
+            } else {
+                isOnlineBattle = true;
+                // ロビーUI初期化
+                document.getElementById('online-lobby-screen').classList.remove('hidden');
+                document.getElementById('lobby-actions').classList.remove('hidden');
+                document.getElementById('lobby-wait').classList.add('hidden');
+                document.getElementById('lobby-back-btn').classList.remove('hidden');
+                document.getElementById('leave-lobby-btn').classList.add('hidden');
+            }
+            playSound('select');
+        }
+
+        function backToPlayStyle() {
+            document.getElementById('online-lobby-screen').classList.add('hidden');
+            document.getElementById('play-style-screen').classList.remove('hidden');
+            playSound('select');
+        }
+
+        // ロビー制御
+        async function createOnlineRoom() {
+            if (!useOnlineDB || !db) {
+                alert("Firebase が設定されていないため、オンライン対戦は利用できません。まず Firebase の設定を行ってください。");
+                return;
+            }
+
+            const code = String(Math.floor(1000 + Math.random() * 9000));
+            onlineRoomId = code;
+            onlineRole = 'host';
+            randomSeed = Math.random();
+
+            document.getElementById('display-room-code').innerText = code;
+            document.getElementById('lobby-actions').classList.add('hidden');
+            document.getElementById('lobby-wait').classList.remove('hidden');
+            document.getElementById('lobby-back-btn').classList.add('hidden');
+            document.getElementById('leave-lobby-btn').classList.remove('hidden');
+
+            document.getElementById('lobby-p1-status').innerText = "CONNECTED";
+            document.getElementById('lobby-p1-status').className = "text-xs text-indigo-400 font-bold font-hud";
+            document.getElementById('lobby-p2-status').innerText = "WAITING...";
+            document.getElementById('lobby-p2-status').className = "text-xs text-slate-500 font-hud";
+
+            setRoomModeUI('classic');
+
+            try {
+                await db.collection("rooms").doc(code).set({
+                    roomId: code,
+                    status: "waiting",
+                    mode: "classic",
+                    seed: randomSeed,
+                    host: { y: 200, vy: 0, isUpsideDown: false, score: 0, isDead: false, isShielded: false, isSuperSpeeding: false, trail: [] },
+                    guest: null,
+                    lastUpdate: Date.now()
+                });
+                listenToRoom(code);
+                playSound('select');
+            } catch (e) {
+                console.error("Failed to create room:", e);
+                alert("ルーム作成に失敗しました。");
+                leaveLobby();
+            }
+        }
+
+        async function joinOnlineRoom() {
+            if (!useOnlineDB || !db) {
+                alert("Firebase が設定されていないため、オンライン対戦は利用できません。");
+                return;
+            }
+            const codeInput = document.getElementById('room-code-input').value.trim();
+            if (codeInput.length !== 4) {
+                alert("4桁の部屋コードを入力してください。");
+                return;
+            }
+
+            onlineRoomId = codeInput;
+            onlineRole = 'guest';
+
+            try {
+                const docRef = db.collection("rooms").doc(codeInput);
+                const doc = await docRef.get();
+                if (!doc.exists) {
+                    alert("指定されたルームが見つかりません。");
+                    return;
+                }
+                const data = doc.data();
+                if (data.status !== "waiting") {
+                    alert("このルームはすでに満員か、ゲームが開始されています。");
+                    return;
+                }
+
+                await docRef.update({
+                    status: "ready",
+                    guest: { y: 200, vy: 0, isUpsideDown: false, score: 0, isDead: false, isShielded: false, isSuperSpeeding: false, trail: [] },
+                    lastUpdate: Date.now()
+                });
+
+                document.getElementById('display-room-code').innerText = codeInput;
+                document.getElementById('lobby-actions').classList.add('hidden');
+                document.getElementById('lobby-wait').classList.remove('hidden');
+                document.getElementById('lobby-back-btn').classList.add('hidden');
+                document.getElementById('leave-lobby-btn').classList.remove('hidden');
+
+                document.getElementById('lobby-p1-status').innerText = "CONNECTED";
+                document.getElementById('lobby-p1-status').className = "text-xs text-indigo-400 font-bold font-hud";
+                document.getElementById('lobby-p2-status').innerText = "CONNECTED";
+                document.getElementById('lobby-p2-status').className = "text-xs text-cyan-400 font-bold font-hud";
+
+                document.getElementById('host-rule-select').classList.add('hidden');
+                document.getElementById('guest-wait-msg').classList.remove('hidden');
+
+                listenToRoom(codeInput);
+                playSound('select');
+            } catch (e) {
+                console.error("Failed to join room:", e);
+                alert("ルームへの接続に失敗しました。");
+            }
+        }
+
+        function listenToRoom(code) {
+            if (onlineUnsubscribe) onlineUnsubscribe();
+
+            onlineUnsubscribe = db.collection("rooms").doc(code).onSnapshot(doc => {
+                if (!doc.exists) {
+                    alert("ルームが削除されました。");
+                    leaveLobby();
+                    return;
+                }
+                const data = doc.data();
+
+                currentMode = data.mode;
+                randomSeed = data.seed;
+
+                if (data.guest) {
+                    document.getElementById('lobby-p2-status').innerText = "CONNECTED";
+                    document.getElementById('lobby-p2-status').className = "text-xs text-cyan-400 font-bold font-hud";
+                    if (onlineRole === 'host') {
+                        document.getElementById('host-rule-select').classList.remove('hidden');
+                    }
+                } else {
+                    document.getElementById('lobby-p2-status').innerText = "WAITING...";
+                    document.getElementById('lobby-p2-status').className = "text-xs text-slate-500 font-hud";
+                    document.getElementById('host-rule-select').classList.add('hidden');
+                }
+
+                if (onlineRole === 'guest') {
+                    document.getElementById('guest-wait-msg').innerText = `WAITING FOR HOST TO START GAME [${currentMode.toUpperCase()}]...`;
+                }
+
+                if (data.status === "playing" && !isPlaying) {
+                    startGameOnline();
+                }
+
+                if (isPlaying) {
+                    const opp = onlineRole === 'host' ? data.guest : data.host;
+                    if (opp) {
+                        opponentPlayerStatus = opp;
+                    }
+                    checkOnlineBattleStatus(data);
+                }
+            });
+        }
+
+        function setRoomMode(mode) {
+            if (onlineRole !== 'host') return;
+            db.collection("rooms").doc(onlineRoomId).update({ mode });
+            setRoomModeUI(mode);
+            playSound('select');
+        }
+
+        function setRoomModeUI(mode) {
+            const btnClassic = document.getElementById('room-btn-classic');
+            const btnDouble = document.getElementById('room-btn-double');
+            const btnChaos = document.getElementById('room-btn-chaos');
+
+            [btnClassic, btnDouble, btnChaos].forEach(btn => {
+                btn.className = "py-2 px-1 text-[10px] font-bold rounded-lg border border-slate-800 bg-slate-950 text-slate-400 font-hud";
+            });
+
+            const activeBtn = document.getElementById(`room-btn-${mode}`);
+            activeBtn.className = "py-2 px-1 text-[10px] font-bold rounded-lg border border-indigo-500 bg-indigo-500/20 text-white font-hud";
+        }
+
+        async function startOnlineGame() {
+            if (onlineRole !== 'host') return;
+            try {
+                await db.collection("rooms").doc(onlineRoomId).update({
+                    status: "playing",
+                    lastUpdate: Date.now()
+                });
+            } catch (e) {
+                console.error("Failed to start online game:", e);
+            }
+        }
+
+        async function leaveLobby() {
+            if (onlineUnsubscribe) {
+                onlineUnsubscribe();
+                onlineUnsubscribe = null;
+            }
+            if (onlineUpdateInterval) {
+                clearInterval(onlineUpdateInterval);
+                onlineUpdateInterval = null;
+            }
+
+            if (onlineRoomId && db) {
+                try {
+                    if (onlineRole === 'host') {
+                        await db.collection("rooms").doc(onlineRoomId).delete();
+                    } else {
+                        await db.collection("rooms").doc(onlineRoomId).update({
+                            status: "waiting",
+                            guest: null
+                        });
+                    }
+                } catch (e) {
+                    console.error("Failed to clean up room:", e);
+                }
+            }
+
+            onlineRoomId = '';
+            document.getElementById('online-lobby-screen').classList.add('hidden');
+            document.getElementById('play-style-screen').classList.remove('hidden');
+            playSound('select');
+        }
+
+        // オンラインの同期更新ループ
+        function startGameStateSync() {
+            if (onlineUpdateInterval) clearInterval(onlineUpdateInterval);
+
+            onlineUpdateInterval = setInterval(() => {
+                if (!isPlaying) return;
+
+                myPlayerStatus = {
+                    y: player.y,
+                    vy: player.vy,
+                    isUpsideDown: player.isUpsideDown,
+                    score: score,
+                    isDead: false,
+                    isShielded: isShielded,
+                    isSuperSpeeding: isSuperSpeeding,
+                    trail: player.trail.map(t => ({ x: t.x, y: t.y, color: t.color }))
+                };
+
+                const updateData = {};
+                updateData[onlineRole] = myPlayerStatus;
+                updateData.lastUpdate = Date.now();
+
+                db.collection("rooms").doc(onlineRoomId).update(updateData).catch(e => {
+                    console.error("Error updating player status:", e);
+                });
+            }, 60);
+        }
+
+        // オンラインプレイの終了・勝敗判定
+        async function checkOnlineBattleStatus(roomData) {
+            if (roomData.status === "finished") return;
+
+            const opp = onlineRole === 'host' ? roomData.guest : roomData.host;
+            if (!opp) return;
+
+            if (!isPlaying && !myPlayerStatus.isDead) {
+                myPlayerStatus.isDead = true;
+                const updateData = {};
+                updateData[onlineRole] = myPlayerStatus;
+                
+                if (opp.isDead) {
+                    updateData.status = "finished";
+                }
+                
+                await db.collection("rooms").doc(onlineRoomId).update(updateData);
+            }
+
+            if (myPlayerStatus.isDead && opp.isDead) {
+                if (onlineUpdateInterval) {
+                    clearInterval(onlineUpdateInterval);
+                    onlineUpdateInterval = null;
+                }
+
+                showOnlineBattleResult(myPlayerStatus.score, opp.score);
+            }
+        }
+
+        function showOnlineBattleResult(myScore, oppScore) {
+            document.getElementById('result-screen').classList.remove('hidden');
+            document.getElementById('res-score').innerText = myScore;
+            
+            const titleEl = document.querySelector('#result-screen h2');
+            const subTitleEl = document.querySelector('#result-screen p');
+            const labelEl = document.querySelector('#result-screen span');
+
+            labelEl.innerText = "ONLINE BATTLE RESULT";
+            labelEl.className = "px-3 py-1 bg-cyan-500/10 text-cyan-400 border border-cyan-500/30 rounded-full text-[10px] font-bold tracking-widest uppercase font-hud mb-1.5 inline-block";
+
+            if (myScore > oppScore) {
+                titleEl.innerText = "YOU_WIN!";
+                titleEl.className = "text-3xl font-black text-emerald-400 font-hud neon-text-cyan";
+                subTitleEl.innerText = `対戦相手 (${oppScore}点) を上回りました！`;
+            } else if (myScore < oppScore) {
+                titleEl.innerText = "YOU_LOSE";
+                titleEl.className = "text-3xl font-black text-rose-500 font-hud";
+                subTitleEl.innerText = `対戦相手 (${oppScore}点) に敗北しました。`;
+            } else {
+                titleEl.innerText = "DRAW_GAME";
+                titleEl.className = "text-3xl font-black text-slate-300 font-hud";
+                subTitleEl.innerText = `同点 (${myScore}点) で引き分けです。`;
+            }
+
+            document.getElementById('rank-in-container').classList.add('hidden');
+        }
+
+        // オンライン対戦用のゲームスタート関数
+        function startGameOnline() {
+            isOnlineBattle = true;
+            document.getElementById('online-lobby-screen').classList.add('hidden');
+            document.getElementById('result-screen').classList.add('hidden');
+            
+            const hud = document.getElementById('game-hud');
+            hud.classList.remove('opacity-0');
+
+            isPlaying = true;
+            score = 0;
+            gameTime = 0;
+            comboMultiplier = 1.0;
+            obstacles = [];
+            sparks = [];
+            items = [];
+            portals = [];
+            spawnCooldown = 0;
+            itemSpawnCooldown = 0;
+            portalSpawnCooldown = 0;
+            currentAmbiance = 'normal';
+            ambianceTimer = 0;
+            isSpacePressed = false;
+            backgroundScrollOffset = 0;
+            railMarkerOffset = 0;
+            framesSinceLastScore = 0;
+
+            const config = difficultyConfig[currentMode];
+            baseSpeed = config.initialSpeed;
+            activeSpeed = config.initialSpeed;
+
+            player.y = floorLineY - player.height;
+            player.vy = 0;
+            player.isUpsideDown = false;
+            player.trail = [];
+            skillGauge = 0;
+            skillLevel = 0;
+            isShielded = false;
+            shieldTimer = 0;
+            isSuperSpeeding = false;
+            superSpeedTimer = 0;
+            obstaclesAvoided = 0;
+
+            myPlayerStatus = { y: player.y, vy: 0, isUpsideDown: false, score: 0, isDead: false, isShielded: false, isSuperSpeeding: false, trail: [] };
+            opponentPlayerStatus = { y: player.y, vy: 0, isUpsideDown: false, score: 0, isDead: false, isShielded: false, isSuperSpeeding: false, trail: [] };
+
+            document.getElementById('hud-highscore').innerText = String(highScore).padStart(5, '0');
+
+            if (currentMode === 'chaos') {
+                startBgm(160);
+            } else if (currentMode === 'double') {
+                startBgm(130);
+            } else {
+                startBgm(110);
+            }
+
+            startGameStateSync();
+            requestAnimationFrame(gameLoop);
+        }
+
+        // 相手ゴーストプレイヤーの描画
+        function drawGhostPlayer(y, isUpsideDown, isShielded, isSuperSpeeding, isDead, trail) {
+            if (isDead) return;
+
+            const width = player.width;
+            const height = player.height;
+            const x = player.x;
+
+            if (trail && Array.isArray(trail)) {
+                trail.forEach((t, index) => {
+                    ctx.save();
+                    ctx.globalAlpha = index / trail.length * 0.25;
+                    ctx.fillStyle = t.color || (t.upside ? '#f43f5e' : '#6366f1');
+                    ctx.fillRect(t.x, t.y, width, height);
+                    ctx.restore();
+                });
+            }
+
+            ctx.save();
+            const mainColor = isUpsideDown ? '#f43f5e' : '#6366f1';
+            ctx.fillStyle = mainColor;
+            ctx.shadowBlur = 12;
+            ctx.shadowColor = mainColor;
+            
+            ctx.beginPath();
+            ctx.roundRect(x, y, width, height, 6);
+            ctx.fill();
+
+            ctx.fillStyle = '#ffffff';
+            ctx.shadowBlur = 0;
+            if (!isUpsideDown) {
+                ctx.fillRect(x + 20, y + 6, 6, 6);
+                ctx.fillRect(x + 6, y + 26, 20, 2);
+            } else {
+                ctx.fillRect(x + 20, y + 20, 6, 6);
+                ctx.fillRect(x + 6, y + 4, 20, 2);
+            }
+            
+            if (isShielded) {
+                ctx.strokeStyle = `rgba(59, 130, 246, ${0.6 + 0.4 * Math.sin(gameTime * 10)})`;
+                ctx.lineWidth = 4;
+                ctx.beginPath();
+                ctx.arc(x + width / 2, y + height / 2, 45, 0, Math.PI * 2);
+                ctx.stroke();
+                
+                ctx.strokeStyle = `rgba(96, 165, 250, ${0.3 + 0.2 * Math.cos(gameTime * 15)})`;
+                ctx.lineWidth = 2;
+                ctx.beginPath();
+                ctx.arc(x + width / 2, y + height / 2, 52, 0, Math.PI * 2);
+                ctx.stroke();
+            }
+            
+            if (isSuperSpeeding) {
+                ctx.strokeStyle = `rgba(251, 146, 60, ${0.4 + 0.2 * Math.sin(gameTime * 15)})`;
+                ctx.lineWidth = 4;
+                for (let i = 0; i < 3; i++) {
+                    ctx.beginPath();
+                    ctx.arc(x + width / 2, y + height / 2, 40 + i * 8, 0, Math.PI * 2);
+                    ctx.stroke();
+                }
+            }
+            
+            ctx.restore();
         }
 
         // ランキングの読み込み
@@ -862,8 +1457,8 @@
                 const config = difficultyConfig[currentMode];
                 
                 // 難易度に応じてサイズを決定
-                this.width = config.obstacleMinWidth + Math.random() * (config.obstacleMaxWidth - config.obstacleMinWidth);
-                this.height = config.obstacleMinHeight + Math.random() * (config.obstacleMaxHeight - config.obstacleMinHeight);
+                this.width = config.obstacleMinWidth + getRand() * (config.obstacleMaxWidth - config.obstacleMinWidth);
+                this.height = config.obstacleMinHeight + getRand() * (config.obstacleMaxHeight - config.obstacleMinHeight);
                 
                 // 画面の少し右外側に出現
                 this.x = canvas.width + 60 + offsetDelay;
@@ -966,7 +1561,7 @@
                 this.x = x;
                 // Y位置を安全な範囲に限定（上下のレールから十分離す）
                 const midline = (ceilingLineY + floorLineY) / 2;
-                this.y = Math.max(ceilingLineY + 50, Math.min(floorLineY - 70, midline + (Math.random() - 0.5) * 100));
+                this.y = Math.max(ceilingLineY + 50, Math.min(floorLineY - 70, midline + (getRand() - 0.5) * 100));
                 this.width = 20;
                 this.height = 20;
                 this.radius = 10;
@@ -1024,7 +1619,7 @@
             constructor(spawnOnCeiling, offsetDelay = 0) {
                 super(spawnOnCeiling, offsetDelay);
                 this.baseHeight = this.height;
-                this.stretchPhase = Math.random() * Math.PI * 2;
+                this.stretchPhase = getRand() * Math.PI * 2;
                 this.type = 'stretching';
             }
 
@@ -1078,8 +1673,8 @@
                 super.update();
                 
                 // ランダムにターゲット位置を変更
-                if (Math.random() < 0.02) {
-                    this.targetY = this.baseY + (Math.random() - 0.5) * this.movementRange;
+                if (getRand() < 0.02) {
+                    this.targetY = this.baseY + (getRand() - 0.5) * this.movementRange;
                 }
                 
                 // ターゲットに向かって移動
@@ -1333,6 +1928,11 @@
             stopBgm();
             playSound('crash');
 
+            if (isOnlineBattle) {
+                // オンライン対戦時はハイスコア保存はしない（対戦結果画面への遷移のみ）
+                return;
+            }
+
             // ハイスコアの保存
             if (score > highScore) {
                 highScore = score;
@@ -1351,15 +1951,84 @@
         // ==========================================
         // 5. メインゲームループ (毎フレーム実行)
         // ==========================================
+        // ------------------------------------------
+        // 分割画面描画システム
+        // ------------------------------------------
+        function drawScene(targetRole) {
+            // 背景を描画
+            drawBackground();
+
+            // 障害物、アイテム、ポータル、火花を描画
+            obstacles.forEach(o => o.draw());
+            items.forEach(it => it.draw());
+            portals.forEach(p => p.draw());
+            sparks.forEach(sp => sp.draw());
+
+            // プレイヤーの描画
+            if (!isOnlineBattle) {
+                // ソロプレイ時
+                player.draw();
+            } else {
+                // オンライン対戦時
+                if (targetRole === onlineRole) {
+                    player.draw();
+                } else {
+                    const opp = opponentPlayerStatus;
+                    drawGhostPlayer(opp.y, opp.isUpsideDown, opp.isShielded, opp.isSuperSpeeding, opp.isDead, opp.trail);
+                }
+            }
+        }
+
+        function drawSplitLine() {
+            ctx.save();
+            ctx.strokeStyle = '#06b6d4';
+            ctx.lineWidth = 4;
+            ctx.shadowBlur = 10;
+            ctx.shadowColor = '#06b6d4';
+            ctx.beginPath();
+            ctx.moveTo(0, canvas.height / 2);
+            ctx.lineTo(canvas.width, canvas.height / 2);
+            ctx.stroke();
+            ctx.restore();
+        }
+
+        function renderGame() {
+            if (!isOnlineBattle) {
+                // 通常のソロ描画
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                drawScene('host');
+            } else {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+                // 上半分 (ホスト)
+                ctx.save();
+                ctx.beginPath();
+                ctx.rect(0, 0, canvas.width, canvas.height / 2);
+                ctx.clip();
+                ctx.scale(1, 0.5);
+                drawScene('host');
+                ctx.restore();
+
+                // 下半分 (ゲスト)
+                ctx.save();
+                ctx.beginPath();
+                ctx.rect(0, canvas.height / 2, canvas.width, canvas.height / 2);
+                ctx.clip();
+                ctx.translate(0, canvas.height / 2);
+                ctx.scale(1, 0.5);
+                drawScene('guest');
+                ctx.restore();
+
+                // 分割線
+                drawSplitLine();
+            }
+        }
+
         function gameLoop() {
             if (!isPlaying) return;
 
             // 時間経過の加算
             gameTime += 1 / 60; // 60FPS想定
-
-            // A. 背景クリア＆サイバー風グリッド・道の描画
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-            drawBackground();
 
             // B. 背景スクロール値を累積（速度同期修正）
             backgroundScrollOffset += activeSpeed * 2;
@@ -1400,7 +2069,6 @@
 
             // C. プレイヤーのアップデート
             player.update();
-            player.draw();
 
             // D. 障害物の生成ロジック
             spawnCooldown--;
@@ -1414,10 +2082,10 @@
                     // モード別のアルゴリズム分岐
                     if (currentMode === 'double') {
                         // 【DOUBLE THREAT モード】：上下に「ほぼ同時」に挟み撃ちのように配置
-                        const topFirst = Math.random() < 0.5;
+                        const topFirst = getRand() < 0.5;
                         
                         // ギミックの種類を決定（3種類：通常、伸び縮み、上下）
-                        const gimmickRand1 = Math.random();
+                        const gimmickRand1 = getRand();
                         let obstacleClass1;
                         if (gimmickRand1 < 0.4) {
                             obstacleClass1 = Obstacle; // 通常のとげ（40%）
@@ -1427,7 +2095,7 @@
                             obstacleClass1 = FollowingObstacle; // 上下するとげ（30%）
                         }
                         
-                        const gimmickRand2 = Math.random();
+                        const gimmickRand2 = getRand();
                         let obstacleClass2;
                         if (gimmickRand2 < 0.4) {
                             obstacleClass2 = Obstacle; // 通常のとげ（40%）
@@ -1438,15 +2106,15 @@
                         }
                         
                         obstacles.push(new obstacleClass1(topFirst));
-                        obstacles.push(new obstacleClass2(!topFirst, 120 + Math.random() * 80));
+                        obstacles.push(new obstacleClass2(!topFirst, 120 + getRand() * 80));
                         
-                        spawnCooldown = config.spawnBaseInterval + Math.random() * 40;
+                        spawnCooldown = config.spawnBaseInterval + getRand() * 40;
                     } else {
                         // 【CLASSIC / CHAOS モード】：完全ランダムに出現
-                        const spawnCeiling = Math.random() < 0.5;
+                        const spawnCeiling = getRand() < 0.5;
                         
                         // ギミックの種類をランダムに決定（3種類)
-                        const gimmickRand = Math.random();
+                        const gimmickRand = getRand();
                         let ObstacleClass;
                         // 通常のとげ、伸び縮みするとげ、上下するとげの3種類
                         if (gimmickRand < 0.4) {
@@ -1474,7 +2142,7 @@
             if (itemSpawnCooldown <= 0) {
                 const config = difficultyConfig[currentMode];
                 items.push(new Item(canvas.width + 60, 0)); // Y座標はコンストラクタで自動計算
-                itemSpawnCooldown = config.itemSpawnInterval + Math.random() * 50;
+                itemSpawnCooldown = config.itemSpawnInterval + getRand() * 50;
             }
 
             // F. ポータルの生成ロジック（ペアで出現：入口と出口）
@@ -1487,7 +2155,7 @@
                     // 床のポータル（入口）と天井のポータル（出口）をペアで生成
                     portals.push(new Portal(true));  // 入口（床）
                     portals.push(new Portal(false)); // 出口（天井）
-                    portalSpawnCooldown = 400 + Math.random() * 150; // ポータルはレアな出現
+                    portalSpawnCooldown = 400 + getRand() * 150; // ポータルはレアな出現
                 } else {
                     // 近くに障害物がある場合は生成を少し遅らせる
                     portalSpawnCooldown = 10;
@@ -1498,7 +2166,6 @@
             for (let i = obstacles.length - 1; i >= 0; i--) {
                 const obs = obstacles[i];
                 obs.update();
-                obs.draw();
 
                 // 物理衝突(Collider)判定
                 if (obs.checkCollision(player)) {
@@ -1572,7 +2239,6 @@
             for (let i = items.length - 1; i >= 0; i--) {
                 const item = items[i];
                 item.update();
-                item.draw();
 
                 // プレイヤーがアイテムを取得
                 if (item.checkCollision(player)) {
@@ -1622,7 +2288,6 @@
             for (let i = portals.length - 1; i >= 0; i--) {
                 const portal = portals[i];
                 portal.update();
-                portal.draw();
 
                 // プレイヤーがポータルに接触
                 if (portal.isEntrance && portal.checkCollision(player) && !portal.used) {
@@ -1683,7 +2348,6 @@
             for (let i = sparks.length - 1; i >= 0; i--) {
                 const sp = sparks[i];
                 sp.update();
-                sp.draw();
                 if (sp.life <= 0) {
                     sparks.splice(i, 1);
                 }
@@ -1701,6 +2365,9 @@
 
             // J. スキルゲージUIの更新
             updateSkillUI();
+
+            // レンダリング実行
+            renderGame();
 
             // 次フレームも継続
             requestAnimationFrame(gameLoop);
