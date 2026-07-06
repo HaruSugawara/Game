@@ -362,6 +362,58 @@
                 osc.start(now);
                 osc.stop(now + 0.15);
             }
+            else if (type === 'select') {
+                // 決定音：ピコーン！（高音の明るい音）
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(1046.50, now); // C6
+                osc.frequency.setValueAtTime(1318.51, now + 0.1); // E6
+                gain.gain.setValueAtTime(0.15, now);
+                gain.gain.exponentialRampToValueAtTime(0.01, now + 0.2);
+                osc.start(now);
+                osc.stop(now + 0.2);
+            }
+            else if (type === 'skill1') {
+                // スキル1（シールド）：シャキーン！（金属的な展開音）
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+                osc.type = 'square';
+                osc.frequency.setValueAtTime(800, now);
+                osc.frequency.exponentialRampToValueAtTime(1200, now + 0.1);
+                gain.gain.setValueAtTime(0.1, now);
+                gain.gain.linearRampToValueAtTime(0, now + 0.3);
+                osc.start(now);
+                osc.stop(now + 0.3);
+            }
+            else if (type === 'skill2') {
+                // スキル2（虚空）：ギュイーン！（エネルギー解放のような重厚な音）
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+                osc.type = 'sawtooth';
+                osc.frequency.setValueAtTime(100, now);
+                osc.frequency.exponentialRampToValueAtTime(800, now + 0.3);
+                
+                const filter = audioCtx.createBiquadFilter();
+                filter.type = 'lowpass';
+                filter.frequency.setValueAtTime(200, now);
+                filter.frequency.exponentialRampToValueAtTime(2000, now + 0.3);
+                
+                osc.disconnect(gain);
+                osc.connect(filter);
+                filter.connect(gain);
+                
+                gain.gain.setValueAtTime(0.2, now);
+                gain.gain.exponentialRampToValueAtTime(0.01, now + 0.5);
+                osc.start(now);
+                osc.stop(now + 0.5);
+            }
         }
 
         // 簡易シンセによるサイバーBGMシーケンサー (ゲームの緊迫感を高めます)
@@ -997,6 +1049,7 @@
          * ==========================================
          */
         function selectMode(mode) {
+            playSound('select');
             currentMode = mode;
             
             // 一旦すべてのカードのハイライトを外す
@@ -1016,6 +1069,7 @@
 
         // タイトル → モード選択
         function showModeSelect() {
+            playSound('select');
             document.getElementById('title-screen').classList.add('hidden');
             document.getElementById('menu-screen').classList.remove('hidden');
             lucide.createIcons();
@@ -1036,6 +1090,7 @@
          * ==========================================
          */
         function startGame() {
+            playSound('skill1');
             document.getElementById('title-screen').classList.add('hidden');
             document.getElementById('menu-screen').classList.add('hidden');
             document.getElementById('result-screen').classList.add('hidden');
@@ -1543,7 +1598,7 @@
                 shieldTimer = 180; // 3秒（60FPS想定）
                 skillGauge = 0;
                 skillLevel = 0;
-                playSound('shift');
+                playSound('skill1');
             } else if (skillLevel === 2) {
                 // 2段階：超加速+無敵（5秒）
                 isSuperSpeeding = true;
@@ -1554,7 +1609,7 @@
                 activeSpeed = baseSpeed * 2;
                 skillGauge = 0;
                 skillLevel = 0;
-                playSound('shift');
+                playSound('skill2');
             }
             // UIを即時反映
             updateSkillUI();
