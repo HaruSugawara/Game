@@ -8,9 +8,8 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Lucide Icons (ゲーム画面のアイコン表示用) -->
     <script src="https://unpkg.com/lucide@latest"></script>
-    <!-- Firebase SDK (Compat version) -->
-    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
+    <!-- PeerJS (WebRTCを用いたサーバー不要のP2P通信ライブラリ) -->
+    <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght=400;700;900&family=Rajdhani:wght=500;700&display=swap');
         .font-gaming {
@@ -432,32 +431,14 @@
         lucide.createIcons();
 
         // ------------------------------------------
-        // Firebase初期化 & データベース管理
+        // PeerJS (P2P通信) 初期化 & 状態管理
         // ------------------------------------------
-        const firebaseConfig = {
-            apiKey: "YOUR_API_KEY",
-            authDomain: "YOUR_AUTH_DOMAIN",
-            projectId: "YOUR_PROJECT_ID",
-            storageBucket: "YOUR_STORAGE_BUCKET",
-            messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
-            appId: "YOUR_APP_ID"
-        };
+        let peer = null;
+        let conn = null;
 
-        // 接続判断フラグ (APIキーが変更されたらFirebaseを有効化、それまではlocalStorageに自動保存)
-        const useOnlineDB = firebaseConfig.apiKey !== "YOUR_API_KEY";
+        // リーダーボードはローカルストレージのみを使用
+        const useOnlineDB = false;
         let db = null;
-
-        if (useOnlineDB) {
-            try {
-                firebase.initializeApp(firebaseConfig);
-                db = firebase.firestore();
-                console.log("Firebase initialized successfully.");
-            } catch (e) {
-                console.error("Firebase initialization failed:", e);
-            }
-        } else {
-            console.log("Using LocalStorage for leaderboard (FirebaseConfig is default).");
-        }
 
         // ------------------------------------------
         // オンライン対戦用 グローバル変数 & ロジック
@@ -466,7 +447,6 @@
         let isOnlineBattle = false;
         let onlineRole = 'host'; // 'host' | 'guest'
         let onlineRoomId = '';
-        let onlineUnsubscribe = null;
         let onlineUpdateInterval = null;
         let randomSeed = 0.5;
 
@@ -520,13 +500,39 @@
             playSound('select');
         }
 
-        // ロビー制御
-        async function createOnlineRoom() {
-            if (!useOnlineDB || !db) {
-                alert("Firebase が設定されていないため、オンライン対戦は利用できません。まず Firebase の設定を行ってください。");
-                return;
-            }
+        // ロビー制御 (PeerJS)
+        function setupPeerDataHandler(connection) {
+            connection.on('data', (data) => {
+                if (data.type === 'sync') {
+                    if (isPlaying) {
+                        opponentPlayerStatus = data.data;
+                        checkOnlineBattleStatus();
+                    }
+                } else if (data.type === 'setMode') {
+                    currentMode = data.mode;
+                    setRoomModeUI(currentMode);
+                } else if (data.type === 'start') {
+                    currentMode = data.mode;
+                    randomSeed = data.seed;
+                    startGameOnline();
+                } else if (data.type === 'gameover') {
+                    opponentPlayerStatus = data.data;
+                    checkOnlineBattleStatus();
+                }
+            });
 
+            connection.on('close', () => {
+                if (isPlaying) {
+                    alert("対戦相手との通信が切断されました。");
+                    gameOver();
+                } else {
+                    alert("ルームが解散されました。");
+                }
+                leaveLobby();
+            });
+        }
+
+        function createOnlineRoom() {
             const code = String(Math.floor(1000 + Math.random() * 9000));
             onlineRoomId = code;
             onlineRole = 'host';
@@ -538,37 +544,56 @@
             document.getElementById('lobby-back-btn').classList.add('hidden');
             document.getElementById('leave-lobby-btn').classList.remove('hidden');
 
-            document.getElementById('lobby-p1-status').innerText = "CONNECTED";
+            document.getElementById('lobby-p1-status').innerText = "CONNECTING...";
             document.getElementById('lobby-p1-status').className = "text-xs text-indigo-400 font-bold font-hud";
             document.getElementById('lobby-p2-status').innerText = "WAITING...";
             document.getElementById('lobby-p2-status').className = "text-xs text-slate-500 font-hud";
 
             setRoomModeUI('classic');
 
-            try {
-                await db.collection("rooms").doc(code).set({
-                    roomId: code,
-                    status: "waiting",
-                    mode: "classic",
-                    seed: randomSeed,
-                    host: { y: 200, vy: 0, isUpsideDown: false, score: 0, isDead: false, isShielded: false, isSuperSpeeding: false, trail: [] },
-                    guest: null,
-                    lastUpdate: Date.now()
+            // PeerJSのホスト初期化
+            const peerId = 'cyber-run-room-' + code;
+            if (peer) peer.destroy();
+            peer = new Peer(peerId);
+
+            peer.on('open', (id) => {
+                document.getElementById('lobby-p1-status').innerText = "CONNECTED";
+                console.log('Host Peer ID: ' + id);
+            });
+
+            peer.on('connection', (c) => {
+                if (conn) {
+                    // すでに接続がある場合は拒否
+                    c.close();
+                    return;
+                }
+                conn = c;
+                conn.on('open', () => {
+                    document.getElementById('lobby-p2-status').innerText = "CONNECTED";
+                    document.getElementById('lobby-p2-status').className = "text-xs text-cyan-400 font-bold font-hud";
+                    document.getElementById('host-rule-select').classList.remove('hidden');
+                    
+                    // ゲストに現在の設定モードを同期
+                    conn.send({ type: 'setMode', mode: currentMode });
                 });
-                listenToRoom(code);
-                playSound('select');
-            } catch (e) {
-                console.error("Failed to create room:", e);
-                alert("ルーム作成に失敗しました。");
+                
+                setupPeerDataHandler(conn);
+            });
+
+            peer.on('error', (err) => {
+                console.error(err);
+                if (err.type === 'unavailable-id') {
+                    alert('このコードは既に使用されています。もう一度作成してください。');
+                } else {
+                    alert('PeerJS接続エラー: ' + err.message);
+                }
                 leaveLobby();
-            }
+            });
+
+            playSound('select');
         }
 
-        async function joinOnlineRoom() {
-            if (!useOnlineDB || !db) {
-                alert("Firebase が設定されていないため、オンライン対戦は利用できません。");
-                return;
-            }
+        function joinOnlineRoom() {
             const codeInput = document.getElementById('room-code-input').value.trim();
             if (codeInput.length !== 4) {
                 alert("4桁の部屋コードを入力してください。");
@@ -578,95 +603,60 @@
             onlineRoomId = codeInput;
             onlineRole = 'guest';
 
-            try {
-                const docRef = db.collection("rooms").doc(codeInput);
-                const doc = await docRef.get();
-                if (!doc.exists) {
-                    alert("指定されたルームが見つかりません。");
-                    return;
-                }
-                const data = doc.data();
-                if (data.status !== "waiting") {
-                    alert("このルームはすでに満員か、ゲームが開始されています。");
-                    return;
-                }
+            if (peer) peer.destroy();
+            peer = new Peer(); // ランダムなID
 
-                await docRef.update({
-                    status: "ready",
-                    guest: { y: 200, vy: 0, isUpsideDown: false, score: 0, isDead: false, isShielded: false, isSuperSpeeding: false, trail: [] },
-                    lastUpdate: Date.now()
-                });
+            peer.on('open', (id) => {
+                const targetId = 'cyber-run-room-' + codeInput;
+                conn = peer.connect(targetId, { reliable: true });
 
-                document.getElementById('display-room-code').innerText = codeInput;
-                document.getElementById('lobby-actions').classList.add('hidden');
-                document.getElementById('lobby-wait').classList.remove('hidden');
-                document.getElementById('lobby-back-btn').classList.add('hidden');
-                document.getElementById('leave-lobby-btn').classList.remove('hidden');
+                conn.on('open', () => {
+                    document.getElementById('display-room-code').innerText = codeInput;
+                    document.getElementById('lobby-actions').classList.add('hidden');
+                    document.getElementById('lobby-wait').classList.remove('hidden');
+                    document.getElementById('lobby-back-btn').classList.add('hidden');
+                    document.getElementById('leave-lobby-btn').classList.remove('hidden');
 
-                document.getElementById('lobby-p1-status').innerText = "CONNECTED";
-                document.getElementById('lobby-p1-status').className = "text-xs text-indigo-400 font-bold font-hud";
-                document.getElementById('lobby-p2-status').innerText = "CONNECTED";
-                document.getElementById('lobby-p2-status').className = "text-xs text-cyan-400 font-bold font-hud";
-
-                document.getElementById('host-rule-select').classList.add('hidden');
-                document.getElementById('guest-wait-msg').classList.remove('hidden');
-
-                listenToRoom(codeInput);
-                playSound('select');
-            } catch (e) {
-                console.error("Failed to join room:", e);
-                alert("ルームへの接続に失敗しました。");
-            }
-        }
-
-        function listenToRoom(code) {
-            if (onlineUnsubscribe) onlineUnsubscribe();
-
-            onlineUnsubscribe = db.collection("rooms").doc(code).onSnapshot(doc => {
-                if (!doc.exists) {
-                    alert("ルームが削除されました。");
-                    leaveLobby();
-                    return;
-                }
-                const data = doc.data();
-
-                currentMode = data.mode;
-                randomSeed = data.seed;
-
-                if (data.guest) {
+                    document.getElementById('lobby-p1-status').innerText = "CONNECTED";
+                    document.getElementById('lobby-p1-status').className = "text-xs text-indigo-400 font-bold font-hud";
                     document.getElementById('lobby-p2-status').innerText = "CONNECTED";
                     document.getElementById('lobby-p2-status').className = "text-xs text-cyan-400 font-bold font-hud";
-                    if (onlineRole === 'host') {
-                        document.getElementById('host-rule-select').classList.remove('hidden');
-                    }
-                } else {
-                    document.getElementById('lobby-p2-status').innerText = "WAITING...";
-                    document.getElementById('lobby-p2-status').className = "text-xs text-slate-500 font-hud";
+
                     document.getElementById('host-rule-select').classList.add('hidden');
-                }
+                    document.getElementById('guest-wait-msg').classList.remove('hidden');
+                    document.getElementById('guest-wait-msg').innerText = "WAITING FOR HOST TO START GAME...";
 
-                if (onlineRole === 'guest') {
-                    document.getElementById('guest-wait-msg').innerText = `WAITING FOR HOST TO START GAME [${currentMode.toUpperCase()}]...`;
-                }
+                    setupPeerDataHandler(conn);
+                });
 
-                if (data.status === "playing" && !isPlaying) {
-                    startGameOnline();
-                }
-
-                if (isPlaying) {
-                    const opp = onlineRole === 'host' ? data.guest : data.host;
-                    if (opp) {
-                        opponentPlayerStatus = opp;
-                    }
-                    checkOnlineBattleStatus(data);
-                }
+                conn.on('error', (err) => {
+                    alert("接続エラー: " + err);
+                    leaveLobby();
+                });
             });
+
+            peer.on('error', (err) => {
+                if (err.type === 'peer-unavailable') {
+                    alert('指定されたルームが見つかりません。');
+                } else {
+                    console.error(err);
+                    alert("通信エラーが発生しました。");
+                }
+                leaveLobby();
+            });
+
+            playSound('select');
         }
 
         function setRoomMode(mode) {
             if (onlineRole !== 'host') return;
-            db.collection("rooms").doc(onlineRoomId).update({ mode });
+            currentMode = mode;
             setRoomModeUI(mode);
+            
+            if (conn && conn.open) {
+                conn.send({ type: 'setMode', mode: mode });
+            }
+            
             playSound('select');
         }
 
@@ -681,43 +671,39 @@
 
             const activeBtn = document.getElementById(`room-btn-${mode}`);
             activeBtn.className = "py-2 px-1 text-[10px] font-bold rounded-lg border border-indigo-500 bg-indigo-500/20 text-white font-hud";
-        }
-
-        async function startOnlineGame() {
-            if (onlineRole !== 'host') return;
-            try {
-                await db.collection("rooms").doc(onlineRoomId).update({
-                    status: "playing",
-                    lastUpdate: Date.now()
-                });
-            } catch (e) {
-                console.error("Failed to start online game:", e);
+            
+            if (onlineRole === 'guest') {
+                document.getElementById('guest-wait-msg').innerText = `WAITING FOR HOST TO START GAME [${mode.toUpperCase()}]...`;
             }
         }
 
-        async function leaveLobby() {
-            if (onlineUnsubscribe) {
-                onlineUnsubscribe();
-                onlineUnsubscribe = null;
+        function startOnlineGame() {
+            if (onlineRole !== 'host' || !conn || !conn.open) {
+                alert('ゲストの参加を待ってください');
+                return;
             }
+            
+            // ゲストに開始合図とシードを送信
+            conn.send({ type: 'start', mode: currentMode, seed: randomSeed });
+            
+            // ホストも開始
+            startGameOnline();
+        }
+
+        function leaveLobby() {
             if (onlineUpdateInterval) {
                 clearInterval(onlineUpdateInterval);
                 onlineUpdateInterval = null;
             }
 
-            if (onlineRoomId && db) {
-                try {
-                    if (onlineRole === 'host') {
-                        await db.collection("rooms").doc(onlineRoomId).delete();
-                    } else {
-                        await db.collection("rooms").doc(onlineRoomId).update({
-                            status: "waiting",
-                            guest: null
-                        });
-                    }
-                } catch (e) {
-                    console.error("Failed to clean up room:", e);
-                }
+            if (conn) {
+                conn.close();
+                conn = null;
+            }
+            
+            if (peer) {
+                peer.destroy();
+                peer = null;
             }
 
             onlineRoomId = '';
@@ -731,48 +717,36 @@
             if (onlineUpdateInterval) clearInterval(onlineUpdateInterval);
 
             onlineUpdateInterval = setInterval(() => {
-                if (!isPlaying) return;
+                if (!isPlaying || !conn || !conn.open) return;
 
                 myPlayerStatus = {
                     y: player.y,
                     vy: player.vy,
                     isUpsideDown: player.isUpsideDown,
                     score: score,
-                    isDead: false,
+                    isDead: myPlayerStatus.isDead, // 死亡フラグ維持
                     isShielded: isShielded,
                     isSuperSpeeding: isSuperSpeeding,
                     trail: player.trail.map(t => ({ x: t.x, y: t.y, color: t.color }))
                 };
 
-                const updateData = {};
-                updateData[onlineRole] = myPlayerStatus;
-                updateData.lastUpdate = Date.now();
-
-                db.collection("rooms").doc(onlineRoomId).update(updateData).catch(e => {
-                    console.error("Error updating player status:", e);
-                });
+                conn.send({ type: 'sync', data: myPlayerStatus });
             }, 60);
         }
 
         // オンラインプレイの終了・勝敗判定
-        async function checkOnlineBattleStatus(roomData) {
-            if (roomData.status === "finished") return;
-
-            const opp = onlineRole === 'host' ? roomData.guest : roomData.host;
-            if (!opp) return;
-
+        function checkOnlineBattleStatus() {
+            const opp = opponentPlayerStatus;
+            
+            // 自分が死んだ瞬間に相手に死亡通知を送る
             if (!isPlaying && !myPlayerStatus.isDead) {
                 myPlayerStatus.isDead = true;
-                const updateData = {};
-                updateData[onlineRole] = myPlayerStatus;
-                
-                if (opp.isDead) {
-                    updateData.status = "finished";
+                if (conn && conn.open) {
+                    conn.send({ type: 'gameover', data: myPlayerStatus });
                 }
-                
-                await db.collection("rooms").doc(onlineRoomId).update(updateData);
             }
 
+            // 両者が死んだら結果画面へ
             if (myPlayerStatus.isDead && opp.isDead) {
                 if (onlineUpdateInterval) {
                     clearInterval(onlineUpdateInterval);
