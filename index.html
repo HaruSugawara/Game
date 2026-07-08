@@ -354,6 +354,15 @@
             </div>
 
             <!-- ==========================================
+                 1.5. ゲームオーバー演出用テキスト
+                 ========================================== -->
+            <div id="game-over-text" class="hidden absolute inset-0 flex items-center justify-center pointer-events-none z-50">
+                <h1 class="text-6xl md:text-8xl font-black text-rose-500 font-hud tracking-widest uppercase drop-shadow-[0_0_15px_rgba(244,63,94,0.8)] animate-pulse">
+                    GAME OVER
+                </h1>
+            </div>
+
+            <!-- ==========================================
                  2. リザルト画面
                  ========================================== -->
             <div id="result-screen" class="hidden absolute inset-0 bg-slate-950/98 flex flex-col items-center justify-center p-4 md:p-6 z-20 overflow-y-auto">
@@ -554,7 +563,16 @@
             // PeerJSのホスト初期化
             const peerId = 'cyber-run-room-' + code;
             if (peer) peer.destroy();
-            peer = new Peer(peerId);
+            
+            const peerConfig = {
+                config: {
+                    'iceServers': [
+                        { url: 'stun:stun.l.google.com:19302' },
+                        { url: 'stun:stun1.l.google.com:19302' }
+                    ]
+                }
+            };
+            peer = new Peer(peerId, peerConfig);
 
             peer.on('open', (id) => {
                 document.getElementById('lobby-p1-status').innerText = "CONNECTED";
@@ -604,7 +622,16 @@
             onlineRole = 'guest';
 
             if (peer) peer.destroy();
-            peer = new Peer(); // ランダムなID
+            
+            const peerConfig = {
+                config: {
+                    'iceServers': [
+                        { url: 'stun:stun.l.google.com:19302' },
+                        { url: 'stun:stun1.l.google.com:19302' }
+                    ]
+                }
+            };
+            peer = new Peer(peerConfig); // ランダムなID
 
             peer.on('open', (id) => {
                 const targetId = 'cyber-run-room-' + codeInput;
@@ -1907,19 +1934,28 @@
                 return;
             }
 
-            // ハイスコアの保存
-            if (score > highScore) {
-                highScore = score;
-                localStorage.setItem('gs_highscore', highScore);
-            }
+            // GAME OVER 演出の表示
+            const gameOverText = document.getElementById('game-over-text');
+            gameOverText.classList.remove('hidden');
 
-            // 画面の表示切り替え
-            document.getElementById('result-screen').classList.remove('hidden');
-            document.getElementById('res-multiplier').innerText = `x${comboMultiplier.toFixed(1)}`;
-            document.getElementById('res-time').innerText = `${gameTime.toFixed(1)}s`;
+            // 2.5秒後にリザルト画面を表示
+            setTimeout(() => {
+                gameOverText.classList.add('hidden');
 
-            // ランキング処理 & 今回のスコア表示
-            handleResultAndLeaderboard(score, currentMode);
+                // ハイスコアの保存
+                if (score > highScore) {
+                    highScore = score;
+                    localStorage.setItem('gs_highscore', highScore);
+                }
+
+                // 画面の表示切り替え
+                document.getElementById('result-screen').classList.remove('hidden');
+                document.getElementById('res-multiplier').innerText = `x${comboMultiplier.toFixed(1)}`;
+                document.getElementById('res-time').innerText = `${gameTime.toFixed(1)}s`;
+
+                // ランキング処理 & 今回のスコア表示
+                handleResultAndLeaderboard(score, currentMode);
+            }, 2500);
         }
 
         // ==========================================
@@ -1999,7 +2035,25 @@
         }
 
         function gameLoop() {
-            if (!isPlaying) return;
+            // レンダリング実行
+            renderGame();
+            
+            // J. スキルゲージUIの更新
+            if (isPlaying) updateSkillUI();
+
+            // 火花パーティクルの更新（死んだ後も演出を続ける）
+            for (let i = sparks.length - 1; i >= 0; i--) {
+                const sp = sparks[i];
+                sp.update();
+                if (sp.life <= 0) {
+                    sparks.splice(i, 1);
+                }
+            }
+
+            // 次フレームの予約（フリーズ回避のために常に回す）
+            requestAnimationFrame(gameLoop);
+
+            if (!isPlaying) return; // 生きている時のみ以下を更新
 
             // 時間経過の加算
             gameTime += 1 / 60; // 60FPS想定
@@ -2318,15 +2372,6 @@
                 }
             }
 
-            // G. 火花パーティクルの更新と描画
-            for (let i = sparks.length - 1; i >= 0; i--) {
-                const sp = sparks[i];
-                sp.update();
-                if (sp.life <= 0) {
-                    sparks.splice(i, 1);
-                }
-            }
-
             // I. 雰囲気の時間管理（パワーモード/ワープモード）
             if (currentAmbiance !== 'normal') {
                 ambianceTimer++;
@@ -2336,15 +2381,6 @@
                     ambianceTimer = 0;
                 }
             }
-
-            // J. スキルゲージUIの更新
-            updateSkillUI();
-
-            // レンダリング実行
-            renderGame();
-
-            // 次フレームも継続
-            requestAnimationFrame(gameLoop);
         }
 
         // サイバーパンク風の背景を描く関数 (Canvas API使用)
