@@ -323,46 +323,47 @@
                 <!-- モードセレクトカード -->
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-4 w-full max-w-3xl mb-8">
                     <!-- モード1: CLASSIC -->
-                    <button onclick="selectMode('classic')" id="card-classic" class="mode-card group relative bg-slate-900 border-2 border-indigo-500/80 p-5 rounded-2xl text-left transition-all duration-300 hover:scale-102 flex flex-col justify-between">
-                        <div>
-                            <div class="text-indigo-400 mb-2"><i data-lucide="play" class="w-6 h-6"></i></div>
-                            <h3 class="text-lg font-bold font-hud text-white mb-1">CLASSIC (王道)</h3>
-                            <p class="text-xs text-slate-400">時間経過とともに加速する最も基本的なモード。リズムを掴んで最長生存を目指せ。</p>
-                        </div>
-                        <div class="mt-3 pt-2 border-t border-slate-700/50 flex justify-between items-end">
-                            <span class="text-[10px] text-slate-500 font-hud">BEST SCORE</span>
-                            <span id="best-score-classic" class="text-sm font-bold text-indigo-300 font-hud">0</span>
-                        </div>
+                    <button onclick="selectMode('classic')" id="card-classic" class="mode-card group relative bg-slate-900 border-2 border-indigo-500/80 p-5 rounded-2xl text-left transition-all duration-300 hover:scale-102">
+                        <div class="text-indigo-400 mb-2"><i data-lucide="play" class="w-6 h-6"></i></div>
+                        <h3 class="text-lg font-bold font-hud text-white mb-1">CLASSIC (王道)</h3>
+                        <p class="text-xs text-slate-400">時間経過とともに加速する最も基本的なモード。リズムを掴んで最長生存を目指せ。</p>
                         <div class="absolute top-3 right-3 text-[10px] text-indigo-400 font-hud font-bold">MODE_01</div>
                     </button>
 
                     <!-- モード2: DOUBLE THREAT -->
-                    <button onclick="selectMode('double')" id="card-double" class="mode-card group relative bg-slate-900/40 border border-slate-800 p-5 rounded-2xl text-left transition-all duration-300 hover:scale-102 hover:bg-slate-900 flex flex-col justify-between">
-                        <div>
-                            <div class="text-pink-500 mb-2"><i data-lucide="split" class="w-6 h-6"></i></div>
-                            <h3 class="text-lg font-bold font-hud text-white mb-1">DOUBLE (二択)</h3>
-                            <p class="text-xs text-slate-400">上下の道に「ほぼ同時」に障害物が出現。中空での重力再反転（フェイント）を極めろ。</p>
-                        </div>
-                        <div class="mt-3 pt-2 border-t border-slate-700/50 flex justify-between items-end">
-                            <span class="text-[10px] text-slate-500 font-hud">BEST SCORE</span>
-                            <span id="best-score-double" class="text-sm font-bold text-pink-300 font-hud">0</span>
-                        </div>
+                    <button onclick="selectMode('double')" id="card-double" class="mode-card group relative bg-slate-900/40 border border-slate-800 p-5 rounded-2xl text-left transition-all duration-300 hover:scale-102 hover:bg-slate-900">
+                        <div class="text-pink-500 mb-2"><i data-lucide="split" class="w-6 h-6"></i></div>
+                        <h3 class="text-lg font-bold font-hud text-white mb-1">DOUBLE (二択)</h3>
+                        <p class="text-xs text-slate-400">上下の道に「ほぼ同時」に障害物が出現。中空での重力再反転（フェイント）を極めろ。</p>
                         <div class="absolute top-3 right-3 text-[10px] text-pink-500 font-hud font-bold">MODE_02</div>
                     </button>
 
                     <!-- モード3: CHAOS PULSE -->
-                    <button onclick="selectMode('chaos')" id="card-chaos" class="mode-card group relative bg-slate-900/40 border border-slate-800 p-5 rounded-2xl text-left transition-all duration-300 hover:scale-102 hover:bg-slate-900 flex flex-col justify-between">
-                        <div>
-                            <div class="text-amber-500 mb-2"><i data-lucide="flame" class="w-6 h-6"></i></div>
-                            <h3 class="text-lg font-bold font-hud text-white mb-1">PULSE (混沌)</h3>
-                            <p class="text-xs text-slate-400">テンポ良く脈打つように、スクロール速度が急加速と急減速を繰り返す高難易度。動体視力を試せ。</p>
-                        </div>
-                        <div class="mt-3 pt-2 border-t border-slate-700/50 flex justify-between items-end">
-                            <span class="text-[10px] text-slate-500 font-hud">BEST SCORE</span>
-                            <span id="best-score-chaos" class="text-sm font-bold text-amber-300 font-hud">0</span>
-                        </div>
+                    <button onclick="selectMode('chaos')" id="card-chaos" class="mode-card group relative bg-slate-900/40 border border-slate-800 p-5 rounded-2xl text-left transition-all duration-300 hover:scale-102 hover:bg-slate-900">
+                        <div class="text-amber-500 mb-2"><i data-lucide="flame" class="w-6 h-6"></i></div>
+                        <h3 class="text-lg font-bold font-hud text-white mb-1">PULSE (混沌)</h3>
+                        <p class="text-xs text-slate-400">テンポ良く脈打つように、スクロール速度が急加速と急減速を繰り返す高難易度。動体視力を試せ。</p>
                         <div class="absolute top-3 right-3 text-[10px] text-amber-500 font-hud font-bold">MODE_03</div>
                     </button>
+                </div>
+
+                <!-- 各モードのハイスコア表示エリア -->
+                <div class="w-full max-w-3xl bg-slate-900/60 border border-slate-800 rounded-xl p-4 mb-8 backdrop-blur-sm">
+                    <h3 class="text-cyan-400 text-[10px] font-bold font-hud tracking-[0.2em] mb-3 text-center uppercase border-b border-slate-800/50 pb-2">🏆 YOUR HIGH SCORES</h3>
+                    <div class="grid grid-cols-3 gap-2 text-center">
+                        <div>
+                            <span class="text-slate-500 text-[9px] font-bold block font-hud mb-1">CLASSIC</span>
+                            <span id="highscore-classic" class="text-lg font-black font-hud text-indigo-400">0</span>
+                        </div>
+                        <div>
+                            <span class="text-slate-500 text-[9px] font-bold block font-hud mb-1">DOUBLE</span>
+                            <span id="highscore-double" class="text-lg font-black font-hud text-pink-400">0</span>
+                        </div>
+                        <div>
+                            <span class="text-slate-500 text-[9px] font-bold block font-hud mb-1">CHAOS</span>
+                            <span id="highscore-chaos" class="text-lg font-black font-hud text-amber-400">0</span>
+                        </div>
+                    </div>
                 </div>
 
                 <!-- スタートボタン -->
@@ -390,10 +391,10 @@
                     <p class="text-slate-400 text-xs">物理的衝突を検知。シミュレーションを終了します。</p>
                 </div>
 
-                <!-- スコアボード統合コンテナ -->
+                <!-- スコアボード & ランキング統合コンテナ -->
                 <div class="w-full max-w-md bg-slate-900/90 border border-slate-850 rounded-2xl p-4 mb-4 backdrop-blur-md shadow-2xl">
                     <!-- 今回の記録 -->
-                    <div class="grid grid-cols-3 gap-2 text-center border-b border-slate-800 pb-3 mb-1">
+                    <div class="grid grid-cols-3 gap-2 text-center border-b border-slate-800 pb-3 mb-3">
                         <div>
                             <span class="text-slate-500 text-[9px] font-bold block font-hud">SCORE</span>
                             <span id="res-score" class="text-2xl font-black font-hud text-indigo-400">0</span>
@@ -459,6 +460,9 @@
         let onlineRoomId = '';
         let onlineUpdateInterval = null;
         let randomSeed = 0.5;
+
+        // requestAnimationFrame の制御用
+        let animationId = null;
 
         // 状態オブジェクト
         let myPlayerStatus = { y: 200, vy: 0, isUpsideDown: false, score: 0, isDead: false, isShielded: false, isSuperSpeeding: false, trail: [] };
@@ -815,11 +819,13 @@
 
         // オンライン対戦用のゲームスタート関数
         function startGameOnline() {
+            if (animationId) {
+                cancelAnimationFrame(animationId);
+                animationId = null;
+            }
             isOnlineBattle = true;
             document.getElementById('online-lobby-screen').classList.add('hidden');
             document.getElementById('result-screen').classList.add('hidden');
-            
-            if (animationId) cancelAnimationFrame(animationId);
             
             const hud = document.getElementById('game-hud');
             hud.classList.remove('opacity-0');
@@ -872,7 +878,7 @@
             }
 
             startGameStateSync();
-            animationId = requestAnimationFrame(gameLoop);
+            requestAnimationFrame(gameLoop);
         }
 
         // 相手ゴーストプレイヤーの描画
@@ -991,34 +997,7 @@
             localStorage.setItem(localKey, JSON.stringify(list));
         }
 
-        let currentRunScore = 0;
 
-        function updateHighScoresDisplay() {
-            const modes = ['classic', 'double', 'chaos'];
-            modes.forEach(mode => {
-                const best = localStorage.getItem(`gs_highscore_${mode}`) || 0;
-                const el = document.getElementById(`best-score-${mode}`);
-                if (el) el.innerText = best;
-                
-                // 現在選ばれているモードならHUDにも反映する
-                if (currentMode === mode) {
-                    highScore = best;
-                    document.getElementById('hud-highscore').innerText = String(highScore).padStart(5, '0');
-                }
-            });
-        }
-
-        // ゲームオーバー時のスコア保存処理
-        function saveHighScore(score, mode) {
-            currentRunScore = score;
-            document.getElementById('res-score').innerText = score;
-            
-            const currentBest = parseInt(localStorage.getItem(`gs_highscore_${mode}`) || '0', 10);
-            if (score > currentBest) {
-                localStorage.setItem(`gs_highscore_${mode}`, score);
-                highScore = score;
-            }
-        }
 
         /*
          * ==========================================
@@ -1217,7 +1196,6 @@
         let baseSpeed = 6;      // スクロール速度
         let activeSpeed = 6;    // 現在フレームのリアル速度（カオスモード用）
         let gameTime = 0;       // ゲーム起動時間 (秒)
-        let animationId = null; // ループ管理用変数
         let comboMultiplier = 1.0; // スコア倍率 (連続で障害物を避けると上昇)
         let framesSinceLastScore = 0;
         let backgroundScrollOffset = 0;  // 背景スクロール位置（ピクセル）
@@ -1813,9 +1791,11 @@
             document.getElementById('title-screen').classList.add('hidden');
             document.getElementById('game-hud').classList.add('opacity-0');
             document.getElementById('menu-screen').classList.remove('hidden');
-            
+
             // ハイスコア表示の更新
-            updateHighScoresDisplay();
+            document.getElementById('highscore-classic').innerText = localStorage.getItem('gs_highscore_classic') || '0';
+            document.getElementById('highscore-double').innerText = localStorage.getItem('gs_highscore_double') || '0';
+            document.getElementById('highscore-chaos').innerText = localStorage.getItem('gs_highscore_chaos') || '0';
         }
 
         /*
@@ -1824,12 +1804,14 @@
          * ==========================================
          */
         function startGame() {
+            if (animationId) {
+                cancelAnimationFrame(animationId);
+                animationId = null;
+            }
             playSound('skill1');
             document.getElementById('title-screen').classList.add('hidden');
             document.getElementById('menu-screen').classList.add('hidden');
             document.getElementById('result-screen').classList.add('hidden');
-            
-            if (animationId) cancelAnimationFrame(animationId); // 多重ループ防止
             
             // HUDをスッと表示
             const hud = document.getElementById('game-hud');
@@ -1871,8 +1853,8 @@
             superSpeedTimer = 0;
             obstaclesAvoided = 0;
 
-            // 以前のハイスコア保存は gameOver() ではなく saveHighScore() に変更
-            updateHighScoresDisplay();
+            // ハイスコア表示反映
+            document.getElementById('hud-highscore').innerText = String(highScore).padStart(5, '0');
 
             // モードに応じたBGM（リズムテンポ）スタート
             if (currentMode === 'chaos') {
@@ -1884,7 +1866,7 @@
             }
 
             // ゲームループ開始
-            animationId = requestAnimationFrame(gameLoop);
+            requestAnimationFrame(gameLoop);
         }
 
         // ゲームオーバー
@@ -1906,19 +1888,17 @@
             setTimeout(() => {
                 gameOverText.classList.add('hidden');
 
-                // ハイスコアの保存
-                if (score > highScore) {
-                    highScore = score;
-                    localStorage.setItem('gs_highscore', highScore);
+                // モード別のハイスコアを保存
+                let savedScore = parseInt(localStorage.getItem('gs_highscore_' + currentMode)) || 0;
+                if (score > savedScore) {
+                    localStorage.setItem('gs_highscore_' + currentMode, score);
                 }
 
                 // 画面の表示切り替え
                 document.getElementById('result-screen').classList.remove('hidden');
+                document.getElementById('res-score').innerText = score;
                 document.getElementById('res-multiplier').innerText = `x${comboMultiplier.toFixed(1)}`;
                 document.getElementById('res-time').innerText = `${gameTime.toFixed(1)}s`;
-
-                // ランキング処理 & 今回のスコア表示
-                saveHighScore(score, currentMode);
             }, 2500);
         }
 
