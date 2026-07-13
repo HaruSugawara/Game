@@ -407,7 +407,7 @@
                     <p class="text-slate-400 text-xs">物理的衝突を検知。シミュレーションを終了します。</p>
                 </div>
 
-                <!-- スコアボード & ランキング統合コンテナ -->
+                <!-- スコアボード統合コンテナ -->
                 <div class="w-full max-w-md bg-slate-900/90 border border-slate-850 rounded-2xl p-4 mb-4 backdrop-blur-md shadow-2xl">
                     <!-- 今回の記録 -->
                     <div class="grid grid-cols-3 gap-2 text-center border-b border-slate-800 pb-3 mb-3">
@@ -423,6 +423,35 @@
                             <span class="text-slate-500 text-[9px] font-bold block font-hud">TIME</span>
                             <span id="res-time" class="text-xl font-bold font-hud text-white">0.0s</span>
                         </div>
+                    </div>
+                </div>
+
+                <div class="text-slate-500 text-xs font-hud animate-pulse tracking-widest mt-4">
+                    CLICK TO CONTINUE
+                </div>
+            </div>
+
+            <!-- ==========================================
+                 2.5. リーダーボード画面
+                 ========================================== -->
+            <div id="leaderboard-screen" class="hidden absolute inset-0 bg-slate-950/98 flex flex-col items-center justify-center p-4 md:p-6 z-20 overflow-y-auto">
+                <!-- ランキング統合コンテナ -->
+                <div class="w-full max-w-md bg-slate-900/90 border border-slate-850 rounded-2xl p-4 mb-4 backdrop-blur-md shadow-2xl">
+                    <!-- ランキングリスト -->
+                    <div>
+                        <h3 class="text-cyan-400 text-[10px] font-bold font-hud tracking-[0.2em] mb-2.5 text-center uppercase">🏆 GLOBAL LEADERBOARD (TOP 5)</h3>
+                        <div id="leaderboard-list" class="space-y-1.5 text-xs font-hud">
+                            <!-- JSによって1位〜5位が挿入されます -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 名前入力フォーム (ランクイン時のみ表示) -->
+                <div id="rank-in-container" class="hidden w-full max-w-md bg-indigo-950/30 border border-indigo-500/30 rounded-2xl p-3 mb-4 text-center backdrop-blur-sm">
+                    <p class="text-indigo-400 text-[10px] font-bold mb-2 tracking-widest animate-pulse font-hud">🎉 NEW RECORD! ENTER YOUR NAME</p>
+                    <div class="flex gap-2">
+                        <input type="text" id="player-name-input" maxlength="10" placeholder="NAME" class="flex-1 bg-slate-950/80 border border-indigo-500/50 rounded-xl px-3 py-1.5 text-white text-center font-bold tracking-widest focus:outline-none focus:border-indigo-400 font-hud">
+                        <button onclick="submitScore()" class="px-5 py-1.5 bg-indigo-600 hover:bg-indigo-500 text-white font-bold rounded-xl transition text-xs font-hud border border-indigo-400/40">SAVE</button>
                     </div>
                 </div>
 
