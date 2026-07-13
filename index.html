@@ -10,6 +10,9 @@
     <script src="https://unpkg.com/lucide@latest"></script>
     <!-- PeerJS (WebRTCを用いたサーバー不要のP2P通信ライブラリ) -->
     <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
+    <!-- Firebase SDK (ランキングデータベース用) -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght=400;700;900&family=Rajdhani:wght=500;700&display=swap');
         .font-gaming {
@@ -381,10 +384,10 @@
                 </h1>
             </div>
 
-            <!-- ==========================================
+              <!-- ==========================================
                  2. リザルト画面
                  ========================================== -->
-            <div id="result-screen" class="hidden absolute inset-0 bg-slate-950/98 flex flex-col items-center justify-center p-4 md:p-6 z-20 overflow-y-auto">
+            <div id="result-screen" onclick="showLeaderboardScreen()" class="hidden absolute inset-0 bg-slate-950/98 flex flex-col items-center justify-center p-4 md:p-6 z-20 overflow-y-auto cursor-pointer">
                 <div class="text-center mb-4">
                     <span class="px-3 py-1 bg-red-500/10 text-red-400 border border-red-500/30 rounded-full text-[10px] font-bold tracking-widest uppercase font-hud mb-1.5 inline-block">CONNECTION LOST</span>
                     <h2 class="text-3xl font-black text-white font-hud">RUN_TERMINATED</h2>
@@ -447,9 +450,27 @@
         let peer = null;
         let conn = null;
 
-        // リーダーボードはローカルストレージのみを使用
-        const useOnlineDB = false;
+        // ------------------------------------------
+        // リーダーボード用 Firebase & ローカル管理
+        // ------------------------------------------
+        // [TODO: あなたのFirebase設定をここに入力してください]
+        const firebaseConfig = {
+            apiKey: "YOUR_API_KEY_HERE",
+            authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
+            projectId: "YOUR_PROJECT_ID",
+            storageBucket: "YOUR_PROJECT_ID.appspot.com",
+            messagingSenderId: "YOUR_SENDER_ID",
+            appId: "YOUR_APP_ID"
+        };
+        // apiKeyが変更されていればオンラインDBを使う
+        const useOnlineDB = firebaseConfig.apiKey !== "YOUR_API_KEY_HERE";
         let db = null;
+        if (useOnlineDB && typeof firebase !== 'undefined') {
+            firebase.initializeApp(firebaseConfig);
+            db = firebase.firestore();
+        }
+
+        let currentRunScore = 0; // 今回のスコア保持用
 
         // ------------------------------------------
         // オンライン対戦用 グローバル変数 & ロジック
@@ -826,6 +847,7 @@
             isOnlineBattle = true;
             document.getElementById('online-lobby-screen').classList.add('hidden');
             document.getElementById('result-screen').classList.add('hidden');
+            document.getElementById('leaderboard-screen').classList.add('hidden');
             
             const hud = document.getElementById('game-hud');
             hud.classList.remove('opacity-0');
@@ -995,6 +1017,77 @@
             list.sort((a, b) => b.score - a.score);
             list = list.slice(0, 5);
             localStorage.setItem(localKey, JSON.stringify(list));
+        }
+
+        // 画面遷移：リザルト → リーダーボード
+        async function showLeaderboardScreen() {
+            // クリック音
+            playSound('select');
+            document.getElementById('result-screen').classList.add('hidden');
+            
+            const lbScreen = document.getElementById('leaderboard-screen');
+            lbScreen.classList.remove('hidden');
+            
+            const listEl = document.getElementById('leaderboard-list');
+            listEl.innerHTML = '<div class="text-center py-4 text-slate-500 animate-pulse">LOADING LEADERBOARD...</div>';
+
+            // ランキング読み込みと表示
+            const board = await fetchLeaderboard(currentMode);
+            renderLeaderboard(board);
+
+            // ランクイン判定（5位より高いか、まだ5件未満か）
+            const isRankIn = board.length < 5 || currentRunScore > (board.length > 0 ? board[board.length - 1].score : 0);
+            
+            const inputContainer = document.getElementById('rank-in-container');
+            if (isRankIn && currentRunScore > 0) {
+                inputContainer.classList.remove('hidden');
+                document.getElementById('player-name-input').value = "";
+                document.getElementById('player-name-input').focus();
+            } else {
+                inputContainer.classList.add('hidden');
+            }
+        }
+
+        function renderLeaderboard(board) {
+            const listEl = document.getElementById('leaderboard-list');
+            listEl.innerHTML = '';
+            
+            for (let i = 0; i < 5; i++) {
+                const item = board[i];
+                const row = document.createElement('div');
+                row.className = 'flex justify-between items-center py-2 border-b border-slate-800/50 last:border-0';
+                
+                let rankColor = 'text-slate-400';
+                if (i === 0) rankColor = 'text-amber-400 font-bold';
+                else if (i === 1) rankColor = 'text-slate-300 font-bold';
+                else if (i === 2) rankColor = 'text-amber-600 font-bold';
+
+                const rankSpan = `<span class="font-bold ${rankColor} w-8">${i + 1}st</span>`;
+                const nameSpan = `<span class="flex-1 text-left truncate text-slate-300 px-2 font-bold">${item ? item.name : '---'}</span>`;
+                const dateSpan = `<span class="text-[10px] text-slate-600 mr-3">${item ? item.date : ''}</span>`;
+                const scoreSpan = `<span class="font-bold text-white text-right w-16">${item ? item.score : '0'}</span>`;
+                
+                row.innerHTML = rankSpan + nameSpan + dateSpan + scoreSpan;
+                listEl.appendChild(row);
+            }
+        }
+
+        async function submitScore() {
+            const inputEl = document.getElementById('player-name-input');
+            const name = inputEl.value.trim().toUpperCase() || 'RUNNER';
+            
+            const submitBtn = document.querySelector('#rank-in-container button');
+            if (submitBtn) submitBtn.disabled = true;
+
+            await saveScoreToDB(name, currentRunScore, currentMode);
+            
+            document.getElementById('rank-in-container').classList.add('hidden');
+            if (submitBtn) submitBtn.disabled = false;
+            
+            const updatedBoard = await fetchLeaderboard(currentMode);
+            renderLeaderboard(updatedBoard);
+            
+            playSound('select');
         }
 
 
@@ -1788,6 +1881,7 @@
         function showMenu() {
             stopBgm();
             document.getElementById('result-screen').classList.add('hidden');
+            document.getElementById('leaderboard-screen').classList.add('hidden');
             document.getElementById('title-screen').classList.add('hidden');
             document.getElementById('game-hud').classList.add('opacity-0');
             document.getElementById('menu-screen').classList.remove('hidden');
@@ -1812,6 +1906,7 @@
             document.getElementById('title-screen').classList.add('hidden');
             document.getElementById('menu-screen').classList.add('hidden');
             document.getElementById('result-screen').classList.add('hidden');
+            document.getElementById('leaderboard-screen').classList.add('hidden');
             
             // HUDをスッと表示
             const hud = document.getElementById('game-hud');
@@ -1893,6 +1988,8 @@
                 if (score > savedScore) {
                     localStorage.setItem('gs_highscore_' + currentMode, score);
                 }
+
+                currentRunScore = score; // リーダーボード用に保持
 
                 // 画面の表示切り替え
                 document.getElementById('result-screen').classList.remove('hidden');
