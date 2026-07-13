@@ -6,6 +6,22 @@
     <title>GRAVITY SHIFT - 重力反転サイバーランナー</title>
     <!-- Tailwind CSS (リッチなデザインを瞬時に適用するスタイルシート) -->
     <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        // デバッグ用：エラーが発生したら画面左上に赤色で表示する
+        window.addEventListener('error', function(e) {
+            const errDiv = document.createElement('div');
+            errDiv.style.position = 'absolute';
+            errDiv.style.zIndex = '9999';
+            errDiv.style.background = 'rgba(255,0,0,0.8)';
+            errDiv.style.color = 'white';
+            errDiv.style.padding = '10px';
+            errDiv.style.top = '10px';
+            errDiv.style.left = '10px';
+            errDiv.style.maxWidth = '90%';
+            errDiv.innerText = 'ERROR: ' + e.message + ' at line ' + e.lineno;
+            document.body.appendChild(errDiv);
+        });
+    </script>
     <!-- Lucide Icons (ゲーム画面のアイコン表示用) -->
     <script src="https://unpkg.com/lucide@latest"></script>
     <!-- PeerJS (WebRTCを用いたサーバー不要のP2P通信ライブラリ) -->
@@ -1876,6 +1892,8 @@
                 cancelAnimationFrame(animationId);
                 animationId = null;
             }
+            isOnlineBattle = false; // ここで明示的にソロモードを保証する
+            
             playSound('skill1');
             document.getElementById('title-screen').classList.add('hidden');
             document.getElementById('menu-screen').classList.add('hidden');
