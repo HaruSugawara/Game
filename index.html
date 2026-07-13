@@ -10,9 +10,6 @@
     <script src="https://unpkg.com/lucide@latest"></script>
     <!-- PeerJS (WebRTCを用いたサーバー不要のP2P通信ライブラリ) -->
     <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
-    <!-- Firebase SDK (ランキングデータベース用) -->
-    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght=400;700;900&family=Rajdhani:wght=500;700&display=swap');
         .font-gaming {
@@ -451,24 +448,10 @@
         let conn = null;
 
         // ------------------------------------------
-        // リーダーボード用 Firebase & ローカル管理
+        // リーダーボード用 オンラインKVS (kvdb.io) 管理
         // ------------------------------------------
-        // [TODO: あなたのFirebase設定をここに入力してください]
-        const firebaseConfig = {
-            apiKey: "YOUR_API_KEY_HERE",
-            authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
-            projectId: "YOUR_PROJECT_ID",
-            storageBucket: "YOUR_PROJECT_ID.appspot.com",
-            messagingSenderId: "YOUR_SENDER_ID",
-            appId: "YOUR_APP_ID"
-        };
-        // apiKeyが変更されていればオンラインDBを使う
-        const useOnlineDB = firebaseConfig.apiKey !== "YOUR_API_KEY_HERE";
-        let db = null;
-        if (useOnlineDB && typeof firebase !== 'undefined') {
-            firebase.initializeApp(firebaseConfig);
-            db = firebase.firestore();
-        }
+        const KVDB_BUCKET = "gravity-shift-lb-819x"; 
+        const KVDB_BASE_URL = `https://kvdb.io/${KVDB_BUCKET}`;
 
         let currentRunScore = 0; // 今回のスコア保持用
 
@@ -889,7 +872,8 @@
             myPlayerStatus = { y: player.y, vy: 0, isUpsideDown: false, score: 0, isDead: false, isShielded: false, isSuperSpeeding: false, trail: [] };
             opponentPlayerStatus = { y: player.y, vy: 0, isUpsideDown: false, score: 0, isDead: false, isShielded: false, isSuperSpeeding: false, trail: [] };
 
-            document.getElementById('hud-highscore').innerText = String(highScore).padStart(5, '0');
+            let savedScore = parseInt(localStorage.getItem('gs_highscore_' + currentMode)) || 0;
+            document.getElementById('hud-highscore').innerText = String(savedScore).padStart(5, '0');
 
             if (currentMode === 'chaos') {
                 startBgm(160);
@@ -969,27 +953,20 @@
         }
 
         // ランキングの読み込み
+        // リーダーボード取得
         async function fetchLeaderboard(mode) {
-            if (useOnlineDB && db) {
-                try {
-                    const snapshot = await db.collection("scores")
-                        .where("mode", "==", mode)
-                        .orderBy("score", "desc")
-                        .limit(5)
-                        .get();
-                    const list = [];
-                    snapshot.forEach(doc => list.push(doc.data()));
-                    return list;
-                } catch (e) {
-                    console.error("Error fetching online scores:", e);
+            try {
+                const response = await fetch(`${KVDB_BASE_URL}/leaderboard_${mode}`);
+                if (response.ok) {
+                    const data = await response.json();
+                    return data.slice(0, 5);
                 }
+            } catch (e) {
+                console.error("Error fetching online scores:", e);
             }
-            // ローカルストレージフォールバック
+            // 失敗時はローカルから
             const localData = localStorage.getItem(`leaderboard_${mode}`);
-            if (localData) {
-                return JSON.parse(localData).slice(0, 5);
-            }
-            return [];
+            return localData ? JSON.parse(localData).slice(0, 5) : [];
         }
 
         // 新規スコアの登録
@@ -997,26 +974,23 @@
             const dateStr = new Date().toLocaleDateString('ja-JP', { month: '2-digit', day: '2-digit' });
             const record = { name, score, mode, date: dateStr, timestamp: Date.now() };
 
-            if (useOnlineDB && db) {
-                try {
-                    await db.collection("scores").add(record);
-                    return;
-                } catch (e) {
-                    console.error("Error saving online score:", e);
-                }
-            }
-
-            // ローカルストレージフォールバック
-            const localKey = `leaderboard_${mode}`;
-            let list = [];
-            const localData = localStorage.getItem(localKey);
-            if (localData) {
-                list = JSON.parse(localData);
-            }
+            let list = await fetchLeaderboard(mode);
             list.push(record);
             list.sort((a, b) => b.score - a.score);
             list = list.slice(0, 5);
-            localStorage.setItem(localKey, JSON.stringify(list));
+
+            try {
+                await fetch(`${KVDB_BASE_URL}/leaderboard_${mode}`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(list)
+                });
+            } catch (e) {
+                console.error("Error saving online score:", e);
+            }
+
+            // ローカルにも保存
+            localStorage.setItem(`leaderboard_${mode}`, JSON.stringify(list));
         }
 
         // 画面遷移：リザルト → リーダーボード
@@ -1949,7 +1923,8 @@
             obstaclesAvoided = 0;
 
             // ハイスコア表示反映
-            document.getElementById('hud-highscore').innerText = String(highScore).padStart(5, '0');
+            let savedScore = parseInt(localStorage.getItem('gs_highscore_' + currentMode)) || 0;
+            document.getElementById('hud-highscore').innerText = String(savedScore).padStart(5, '0');
 
             // モードに応じたBGM（リズムテンポ）スタート
             if (currentMode === 'chaos') {
